@@ -26,9 +26,9 @@ const STORAGE_COLLABS = 'campus_connect_collabs_v2';
 const STORAGE_THEME = 'campus_connect_theme';
 
 const sampleProducts = [
-    { id: uid(), title: 'Physics Notes (Sem1)', price: '₹50', desc: 'Handwritten neat notes. 40 pages.', seller: 'Ravi', contact: '9876543210', img: '', ts: Date.now() - 1000 * 60 * 30, ownerId: deviceId },
-    { id: uid(), title: 'Charger Type-C', price: '₹200', desc: 'Genuine cable, lightly used.', seller: 'Neha', contact: '9876543211', img: '', ts: Date.now() - 1000 * 60 * 60 * 2, ownerId: 'dev_other' },
-    { id: uid(), title: 'Pocket Calculator', price: '₹150', desc: 'Casio-style calculator.', seller: 'Aman', contact: '9876543212', img: '', ts: Date.now() - 1000 * 60 * 5, ownerId: 'dev_other2' }
+    { id: uid(), title: 'Physics Notes (Sem1)', price: '₹50', desc: 'Handwritten neat notes. 40 pages.', seller: 'Ravi', contact: '9876543210', img: 'https://image.pollinations.ai/prompt/handwritten%20physics%20notes%20on%20paper', ts: Date.now() - 1000 * 60 * 30, ownerId: deviceId },
+    { id: uid(), title: 'Charger Type-C', price: '₹200', desc: 'Genuine cable, lightly used.', seller: 'Neha', contact: '9876543211', img: 'https://image.pollinations.ai/prompt/usb%20type%20c%20charger%20cable', ts: Date.now() - 1000 * 60 * 60 * 2, ownerId: 'dev_other' },
+    { id: uid(), title: 'Pocket Calculator', price: '₹150', desc: 'Casio-style calculator.', seller: 'Aman', contact: '9876543212', img: 'https://image.pollinations.ai/prompt/scientific%20calculator', ts: Date.now() - 1000 * 60 * 5, ownerId: 'dev_other2' }
 ];
 const sampleCollabs = [
     { id: uid(), title: 'Need 2 for Hackathon', cat: 'Hackathon', desc: 'Forming a team for InnovEdam. Need 1 dev and 1 designer.', contact: '9876543213', joined: 1, ts: Date.now() - 1000 * 60 * 90, ownerId: 'dev_other' },
@@ -40,8 +40,32 @@ const sampleCollabs = [
 function loadData() {
     let products = JSON.parse(localStorage.getItem(STORAGE_PRODUCTS) || 'null');
     let collabs = JSON.parse(localStorage.getItem(STORAGE_COLLABS) || 'null');
-    if (!products || !Array.isArray(products)) { products = sampleProducts; localStorage.setItem(STORAGE_PRODUCTS, JSON.stringify(products)) }
-    if (!collabs || !Array.isArray(collabs)) { collabs = sampleCollabs; localStorage.setItem(STORAGE_COLLABS, JSON.stringify(collabs)) }
+
+    if (!products || !Array.isArray(products)) {
+        products = sampleProducts;
+        localStorage.setItem(STORAGE_PRODUCTS, JSON.stringify(products));
+    } else {
+        // Patch: Add images to existing products if missing or if using old picsum seed
+        let changed = false;
+        products = products.map(p => {
+            if (!p.img || p.img.includes('picsum.photos')) {
+                // Use pollinations.ai for relevant images based on title
+                const keyword = encodeURIComponent(p.title + ' product photo');
+                p.img = `https://image.pollinations.ai/prompt/${keyword}`;
+                changed = true;
+            }
+            return p;
+        });
+        if (changed) {
+            localStorage.setItem(STORAGE_PRODUCTS, JSON.stringify(products));
+        }
+    }
+
+    if (!collabs || !Array.isArray(collabs)) {
+        collabs = sampleCollabs;
+        localStorage.setItem(STORAGE_COLLABS, JSON.stringify(collabs));
+    }
+
     return { products, collabs };
 }
 function saveProducts(products) { localStorage.setItem(STORAGE_PRODUCTS, JSON.stringify(products)) }

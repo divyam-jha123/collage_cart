@@ -16,6 +16,7 @@ const timeAgo = (ts) => {
 }
 const STORAGE_THEME = 'campus_connect_theme';
 
+
 // Current user
 let currentUser = null;
 
@@ -187,6 +188,7 @@ async function deleteItem(id) {
         toast('Error deleting item');
         return false;
     }
+
 }
 
 async function deleteCollaborationFromDB(id) {

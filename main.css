@@ -20,7 +20,21 @@
  body {
      font-family: Inter, system-ui, Segoe UI, Roboto, "Helvetica Neue", Arial;
      margin: 0;
-     background: var(--bg);
+     /* Mesh Gradient Background */
+     background-color: #f3f4f6;
+     background-image:
+         radial-gradient(at 0% 0%, hsla(253, 16%, 7%, 1) 0, transparent 50%),
+         radial-gradient(at 50% 0%, hsla(225, 39%, 30%, 1) 0, transparent 50%),
+         radial-gradient(at 100% 0%, hsla(339, 49%, 30%, 1) 0, transparent 50%);
+     background-image:
+         radial-gradient(at 10% 10%, rgba(255, 220, 200, 0.6) 0px, transparent 50%),
+         radial-gradient(at 90% 10%, rgba(130, 80, 255, 0.5) 0px, transparent 50%),
+         radial-gradient(at 30% 40%, rgba(255, 100, 80, 0.5) 0px, transparent 50%),
+         radial-gradient(at 70% 60%, rgba(100, 50, 255, 0.5) 0px, transparent 50%),
+         radial-gradient(at 10% 90%, rgba(255, 150, 100, 0.4) 0px, transparent 50%),
+         radial-gradient(at 90% 90%, rgba(150, 100, 255, 0.4) 0px, transparent 50%);
+     background-attachment: fixed;
+     background-size: 120% 120%;
      color: var(--text);
      transition: background-color 0.3s ease, color 0.3s ease;
  }
@@ -243,31 +257,33 @@
  }
 
  .product-card {
-     background: var(--card);
+     background: rgba(255, 255, 255, 0.7);
+     backdrop-filter: blur(12px);
+     -webkit-backdrop-filter: blur(12px);
      padding: 12px;
      border-radius: 12px;
-     box-shadow: var(--shadow);
+     box-shadow: 0 4px 12px rgba(29, 40, 75, 0.08);
      display: flex;
      flex-direction: column;
      gap: 8px;
      transition: all 0.3s ease;
-     border: 1px solid transparent;
+     border: 1px solid rgba(255, 255, 255, 0.4);
  }
 
  .product-card:hover {
-     transform: translateY(-2px);
-     box-shadow: 0 8px 24px rgba(29, 40, 75, 0.12);
+     transform: translateY(-8px);
+     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
  }
 
  body.dark .product-card {
      border-color: rgba(255, 255, 255, 0.08);
-     background: var(--card);
+     background: rgba(37, 43, 59, 0.6);
  }
 
  body.dark .product-card:hover {
      border-color: rgba(129, 140, 248, 0.3);
-     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
-     transform: translateY(-2px);
+     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.3);
+     transform: translateY(-8px);
  }
 
  .product-card img {
@@ -348,31 +364,33 @@
  }
 
  .collab-card {
-     background: var(--card);
+     background: rgba(255, 255, 255, 0.7);
+     backdrop-filter: blur(12px);
+     -webkit-backdrop-filter: blur(12px);
      padding: 12px;
      border-radius: 12px;
-     box-shadow: var(--shadow);
+     box-shadow: 0 4px 12px rgba(29, 40, 75, 0.08);
      display: flex;
      flex-direction: column;
      gap: 8px;
      transition: all 0.3s ease;
-     border: 1px solid transparent;
+     border: 1px solid rgba(255, 255, 255, 0.4);
  }
 
  .collab-card:hover {
-     transform: translateY(-2px);
-     box-shadow: 0 8px 24px rgba(29, 40, 75, 0.12);
+     transform: translateY(-8px);
+     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
  }
 
  body.dark .collab-card {
      border-color: rgba(255, 255, 255, 0.08);
-     background: var(--card);
+     background: rgba(37, 43, 59, 0.6);
  }
 
  body.dark .collab-card:hover {
      border-color: rgba(129, 140, 248, 0.3);
-     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
-     transform: translateY(-2px);
+     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.3);
+     transform: translateY(-8px);
  }
 
  .collab-meta {
@@ -1089,4 +1107,17 @@
 
  .footer-links a:hover {
      color: var(--accent);
+ }
+
+ /* Sidebar Gradient Update */
+ .sidebar {
+     background: rgba(255, 255, 255, 0.4);
+     backdrop-filter: blur(12px);
+     -webkit-backdrop-filter: blur(12px);
+     border-right: 1px solid rgba(255, 255, 255, 0.4);
+ }
+
+ body.dark .sidebar {
+     background: rgba(15, 23, 42, 0.3);
+     border-right: 1px solid rgba(255, 255, 255, 0.05);
  }

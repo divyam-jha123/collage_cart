@@ -1,7 +1,19 @@
 // Import Supabase client
 import { supabase } from './supabaseClient.js';
 
-
+// Notification helper function
+function showNotification(message, type = 'error') {
+    const notificationId = type === 'success' ? 'success-notification' : 'notification';
+    const notification = document.getElementById(notificationId);
+    if (notification) {
+        notification.textContent = message;
+        notification.style.display = 'block';
+        // Auto-hide after 4 seconds
+        setTimeout(() => {
+            notification.style.display = 'none';
+        }, 4000);
+    }
+}
 
 // Initialize theme on page load
 document.addEventListener('DOMContentLoaded', () => {
@@ -42,7 +54,7 @@ async function handleLogin(event) {
     const password = document.getElementById('password').value.trim();
 
     if (!email || !password) {
-        alert('Please enter both email and college code');
+        showNotification('Please enter both email and college code', 'error');
         return false;
     }
 
@@ -76,7 +88,7 @@ async function handleLogin(event) {
         if (data.user) {
             // Check if email is confirmed
             if (!data.user.email_confirmed_at && data.user.confirmation_sent_at) {
-                alert('Please check your email and click the confirmation link before logging in.');
+                showNotification('Please check your email and click the confirmation link before logging in.', 'error');
                 loginBtn.disabled = false;
                 loginBtn.textContent = originalText;
                 return false;
@@ -94,7 +106,7 @@ async function handleLogin(event) {
         }
     } catch (error) {
         console.error('Login error:', error);
-        alert('Login failed: ' + (error.message || 'Invalid email or password'));
+        showNotification('Login failed: ' + (error.message || 'Invalid email or password'), 'error');
         loginBtn.disabled = false;
         loginBtn.textContent = originalText;
         return false;
@@ -108,36 +120,62 @@ async function handlePasswordReset() {
     const email = document.getElementById('college-code').value.trim();
 
     if (!email) {
-        const emailInput = prompt('Enter your email address to reset password:');
-        if (!emailInput) return;
+        // Show inline email input instead of prompt
+        const emailInput = document.createElement('input');
+        emailInput.type = 'email';
+        emailInput.placeholder = 'Enter your email address';
+        emailInput.style.cssText = 'width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px;';
+        
+        const form = document.getElementById('login-form');
+        const existingInput = form.querySelector('#reset-email-input');
+        if (existingInput) existingInput.remove();
+        
+        emailInput.id = 'reset-email-input';
+        form.insertBefore(emailInput, form.firstChild);
+        
+        emailInput.focus();
+        emailInput.addEventListener('blur', async () => {
+            const emailValue = emailInput.value.trim();
+            if (emailValue) {
+                emailInput.remove();
+                try {
+                    const { error } = await supabase.auth.resetPasswordForEmail(emailValue, {
+                        redirectTo: window.location.origin + '/login.html'
+                    });
 
-        try {
-            const { error } = await supabase.auth.resetPasswordForEmail(emailInput, {
-                redirectTo: window.location.origin + '/login.html'
-            });
-
-            if (error) {
-                alert('Error: ' + error.message);
+                    if (error) {
+                        showNotification('Error: ' + error.message, 'error');
+                    } else {
+                        showNotification('Password reset email sent! Please check your inbox.', 'success');
+                    }
+                } catch (error) {
+                    showNotification('Error sending reset email: ' + error.message, 'error');
+                }
             } else {
-                alert('Password reset email sent! Please check your inbox.');
+                emailInput.remove();
             }
-        } catch (error) {
-            alert('Error sending reset email: ' + error.message);
-        }
-    } else {
-        try {
-            const { error } = await supabase.auth.resetPasswordForEmail(email, {
-                redirectTo: window.location.origin + '/login.html'
-            });
+        });
+        
+        emailInput.addEventListener('keypress', async (e) => {
+            if (e.key === 'Enter') {
+                emailInput.blur();
+            }
+        });
+        return;
+    }
 
-            if (error) {
-                alert('Error: ' + error.message);
-            } else {
-                alert('Password reset email sent! Please check your inbox.');
-            }
-        } catch (error) {
-            alert('Error sending reset email: ' + error.message);
+    try {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+            redirectTo: window.location.origin + '/login.html'
+        });
+
+        if (error) {
+            showNotification('Error: ' + error.message, 'error');
+        } else {
+            showNotification('Password reset email sent! Please check your inbox.', 'success');
         }
+    } catch (error) {
+        showNotification('Error sending reset email: ' + error.message, 'error');
     }
 }
 

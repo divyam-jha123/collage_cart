@@ -1,6 +1,20 @@
 // Import Supabase client
 import { supabase } from './supabaseClient.js';
 
+// Notification helper function
+function showNotification(message, type = 'error') {
+    const notificationId = type === 'success' ? 'success-notification' : 'notification';
+    const notification = document.getElementById(notificationId);
+    if (notification) {
+        notification.textContent = message;
+        notification.style.display = 'block';
+        // Auto-hide after 4 seconds
+        setTimeout(() => {
+            notification.style.display = 'none';
+        }, 4000);
+    }
+}
+
 // Theme toggle functionality
 const STORAGE_THEME = 'login_theme';
 
@@ -65,17 +79,17 @@ async function handleSignup(event) {
     
     // Validation
     if (!email || !password) {
-        alert('Please enter both email and password');
+        showNotification('Please enter both email and password', 'error');
         return false;
     }
     
     if (password.length < 6) {
-        alert('Password must be at least 6 characters long');
+        showNotification('Password must be at least 6 characters long', 'error');
         return false;
     }
     
     if (password !== confirmPassword) {
-        alert('Passwords do not match');
+        showNotification('Passwords do not match', 'error');
         return false;
     }
     
@@ -100,14 +114,16 @@ async function handleSignup(event) {
         }
         
         if (data.user) {
-            alert('Account created successfully! Please check your email to verify your account, or you can try logging in now.');
-            // Redirect to login page
-            window.location.href = './login.html';
+            showNotification('Account created successfully! Please check your email to verify your account, or you can try logging in now.', 'success');
+            // Redirect to login page after 2 seconds
+            setTimeout(() => {
+                window.location.href = './login.html';
+            }, 2000);
             return false;
         }
     } catch (error) {
         console.error('Signup error:', error);
-        alert('Signup failed: ' + (error.message || 'Unable to create account. Please try again.'));
+        showNotification('Signup failed: ' + (error.message || 'Unable to create account. Please try again.'), 'error');
         signupBtn.disabled = false;
         signupBtn.textContent = originalText;
         return false;

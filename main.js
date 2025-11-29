@@ -406,8 +406,8 @@ let state = { products: [], collabs: [] };
 async function refreshData() {
     state.products = await loadItems();
     state.collabs = await loadCollaborations();
-    renderProducts(state.products);
-    renderCollabs(state.collabs);
+renderProducts(state.products);
+renderCollabs(state.collabs);
     updateDashboard();
 }
 
@@ -427,7 +427,7 @@ function closeModal() {
 }
 
 if (modalBack) {
-    modalBack.addEventListener('click', (e) => { if (e.target === modalBack) closeModal(); });
+modalBack.addEventListener('click', (e) => { if (e.target === modalBack) closeModal(); });
 }
 
 /************ Sell product modal/form ************/
@@ -529,7 +529,7 @@ function openSellModal(product = null) {
         const f = e.target.files && e.target.files[0];
         if (!f) return;
         if (f.size > 5 * 1024 * 1024) {
-            alert('File size must be less than 5MB');
+            toast('File size must be less than 5MB');
             return;
         }
         const reader = new FileReader();
@@ -560,7 +560,7 @@ function openSellModal(product = null) {
         };
 
         if (!obj.title || !fd.get('price') || !obj.contact) {
-            alert('Please fill title, price, and contact');
+            toast('Please fill title, price, and contact');
             submitBtn.disabled = false;
             submitBtn.textContent = originalText;
             return;
@@ -568,8 +568,8 @@ function openSellModal(product = null) {
 
         const success = await saveItem(obj, isEdit);
         if (success) {
-            toast(product ? 'Product updated' : 'Product added');
-            closeModal();
+        toast(product ? 'Product updated' : 'Product added');
+        closeModal();
             await refreshData();
         }
         submitBtn.disabled = false;
@@ -648,7 +648,7 @@ function openCollabModal(collab = null) {
         };
 
         if (!obj.title || !obj.contact) {
-            alert('Please fill Title and Contact fields');
+            toast('Please fill Title and Contact fields');
             submitBtn.disabled = false;
             submitBtn.textContent = originalText;
             return;
@@ -827,7 +827,7 @@ async function deleteProduct(id) {
     if (!confirm('Delete this product?')) return;
     const success = await deleteItem(id);
     if (success) {
-        toast('Product removed');
+    toast('Product removed');
         await refreshData();
     }
 }
@@ -836,7 +836,7 @@ async function deleteCollab(id) {
     if (!confirm('Delete this invite?')) return;
     const success = await deleteCollaborationFromDB(id);
     if (success) {
-        toast('Invitation removed');
+    toast('Invitation removed');
         await refreshData();
     }
 }

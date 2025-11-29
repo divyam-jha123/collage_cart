@@ -1,103 +1,99 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>College Cart Portal - Login</title>
-    <link rel="stylesheet" href="login.css" />
-  </head>
-  <body>
-    <div class="container">
-      <button class="theme-toggle" id="theme-toggle" title="Toggle theme" aria-label="Toggle dark mode">
-        <span class="theme-icon">🌙</span>
-      </button>
 
-      <div class="header">
-        <div class="logo-container">
-          <div class="logo">
-            <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect width="48" height="48" rx="24" fill="url(#gradient)"/>
-              <path d="M24 16L28 22H32L26 30L28 36L24 32L20 36L22 30L16 22H20L24 16Z" fill="white"/>
-              <defs>
-                <linearGradient id="gradient" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
-                  <stop stop-color="#667eea"/>
-                  <stop offset="1" stop-color="#764ba2"/>
-                </linearGradient>
-              </defs>
-            </svg>
-          </div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>College Cart Portal - Login</title>
+  <link rel="stylesheet" href="login.css" />
+</head>
+
+<body>
+  <canvas id="canvas" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0;"></canvas>
+  <div class="container" style="position: relative; z-index: 1;">
+    <button class="theme-toggle" id="theme-toggle" title="Toggle theme" aria-label="Toggle dark mode">
+      <span class="theme-icon">🌙</span>
+    </button>
+
+    <div class="header">
+      <div class="logo-container">
+        <div class="logo">
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="48" height="48" rx="24" fill="url(#gradient)" />
+            <path d="M24 16L28 22H32L26 30L28 36L24 32L20 36L22 30L16 22H20L24 16Z" fill="white" />
+            <defs>
+              <linearGradient id="gradient" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#667eea" />
+                <stop offset="1" stop-color="#764ba2" />
+              </linearGradient>
+            </defs>
+          </svg>
         </div>
-        <div class="college-name">
-          <span>College Cart</span>
-          <span>Portal</span>
-        </div>
-        <p class="subtitle">Welcome back! Please sign in to continue</p>
       </div>
-
-      <form onsubmit="handleLogin(event)" class="login-form">
-        <div class="form-group">
-          <label for="email">
-            <span class="label-icon">📧</span>
-            Email Address
-          </label>
-          <div class="input-wrapper">
-            <input
-              type="email"
-              id="college-code"
-              name="email"
-              placeholder="your.email@college.edu"
-              required
-              autocomplete="email"
-            />
-            <span class="input-focus-line"></span>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label for="password">
-            <span class="label-icon">🔐</span>
-            College Code
-          </label>
-          <div class="input-wrapper">
-            <input
-              type="password"
-              id="password"
-              name="password"
-              placeholder="Enter your college code"
-              required
-              autocomplete="current-password"
-            />
-            <span class="input-focus-line"></span>
-          </div>
-        </div>
-
-        <div class="form-options">
-          <label class="remember-me">
-            <input type="checkbox" id="remember" />
-            <span>Remember me</span>
-          </label>
-          <a href="#" class="forgot-link">Forgot code?</a>
-        </div>
-
-        <a href="./main.html" class="login-link">
-          <button type="button" class="login-btn">
-            <span>Sign In</span>
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M7.5 15L12.5 10L7.5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </button>
-        </a>
-
-        <div class="divider">
-          <span>or</span>
-        </div>
-
-        <div class="signup-prompt">
-          <p>Don't have an account? <a href="#" class="signup-link">Sign up</a></p>
-        </div>
-      </form>
+      <div class="college-name">
+        <span>College Cart</span>
+        <span>Portal</span>
+      </div>
+      <p class="subtitle">Welcome back! Please sign in to continue</p>
     </div>
 
-    <script src="login.js"></script>
-  </body>
+    <!-- Notification Container -->
+    <div id="notification" class="page-notification error-notification"></div>
+    <div id="success-notification" class="page-notification success-notification"></div>
+
+    <form id="login-form" class="login-form">
+      <div class="form-group">
+        <label for="college-code">
+          <span class="label-icon">📧</span>
+          Email Address
+        </label>
+        <div class="input-wrapper">
+          <input type="email" id="college-code" name="email" placeholder="your.email@college.edu" required
+            autocomplete="email" />
+          <span class="input-focus-line"></span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="password">
+          <span class="label-icon">🔐</span>
+          College Code
+        </label>
+        <div class="input-wrapper">
+          <input type="password" id="password" name="password" placeholder="Enter your college code" required
+            autocomplete="current-password" />
+          <span class="input-focus-line"></span>
+        </div>
+      </div>
+
+      <div class="form-options">
+        <label class="remember-me">
+          <input type="checkbox" id="remember" />
+          <span>Remember me</span>
+        </label>
+        <a href="#" id="reset-password-link" class="forgot-link">Forgot code?</a>
+      </div>
+
+      <button type="submit" class="login-btn">
+        <span>Sign In</span>
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M7.5 15L12.5 10L7.5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round" />
+        </svg>
+      </button>
+
+      <div class="divider">
+        <span>or</span>
+      </div>
+
+      <div class="signup-prompt">
+        <p>Don't have an account? <a href="./signup.html" class="signup-link">Sign up</a></p>
+      </div>
+    </form>
+  </div>
+
+  <script src="particles.js"></script>
+  <script type="module" src="login.js"></script>
+</body>
+
 </html>

@@ -94,10 +94,10 @@ Replace the UUIDs below with actual user IDs:
 
 ```sql
 -- Replace 'YOUR_USER_ID_1', 'YOUR_USER_ID_2', etc. with actual UUIDs
-INSERT INTO items (seller_id, title, description, price, category, is_active) VALUES
-    ('YOUR_USER_ID_1', 'Physics Notes (Sem1)', 'Handwritten neat notes. 40 pages.', 50.00, 'Study Materials', TRUE),
-    ('YOUR_USER_ID_2', 'Charger Type-C', 'Genuine cable, lightly used.', 200.00, 'Electronics', TRUE),
-    ('YOUR_USER_ID_3', 'Pocket Calculator', 'Casio-style calculator.', 150.00, 'Electronics', TRUE);
+INSERT INTO items (seller_id, title, description, price, category, contact_info, is_active) VALUES
+    ('YOUR_USER_ID_1', 'Physics Notes (Sem1)', 'Handwritten neat notes. 40 pages.', 50.00, 'Study Materials', '9876543210', TRUE),
+    ('YOUR_USER_ID_2', 'Charger Type-C', 'Genuine cable, lightly used.', 200.00, 'Electronics', '9876543211', TRUE),
+    ('YOUR_USER_ID_3', 'Pocket Calculator', 'Casio-style calculator.', 150.00, 'Electronics', '9876543212', TRUE);
 ```
 
 ### Insert Sample Collaborations

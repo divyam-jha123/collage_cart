@@ -287,23 +287,68 @@ function renderCollabs(collabs, filter = null) {
         const card = document.createElement('article');
         card.className = 'collab-card';
         card.setAttribute('role', 'listitem');
-        const head = document.createElement('div');
-        head.className = 'collab-meta';
-        head.innerHTML = `<div style="font-weight:700">${c.title}</div><div class="small-muted">${timeAgo(c.ts)}</div>`;
-        const tagwrap = document.createElement('div');
-        tagwrap.className = 'tags';
-        if (c.cat) {
-            const tag = document.createElement('span');
-            tag.className = 'chip';
-            tag.textContent = c.cat;
-            tagwrap.appendChild(tag);
-        }
+
+        // Header: Category & Time
+        const header = document.createElement('div');
+        header.className = 'collab-header';
+
+        const catChip = document.createElement('span');
+        catChip.className = 'chip';
+        catChip.textContent = c.cat || 'General';
+        catChip.style.fontSize = '11px';
+        catChip.style.padding = '4px 8px';
+
+        const time = document.createElement('div');
+        time.className = 'small-muted';
+        time.textContent = timeAgo(c.ts);
+
+        header.append(catChip, time);
+
+        // Body: Title & Desc
+        const body = document.createElement('div');
+        body.className = 'collab-body';
+
+        const title = document.createElement('div');
+        title.className = 'collab-title';
+        title.textContent = c.title;
+
         const desc = document.createElement('div');
         desc.className = 'product-desc';
         desc.textContent = c.desc;
-        const meta = document.createElement('div');
-        meta.className = 'small-muted';
-        meta.textContent = 'Posted by: ' + (c.contact || 'Anonymous');
+        // Limit desc lines if needed via CSS, but keeping simple here
+
+        body.append(title, desc);
+
+        // Footer: Author & Actions
+        const footer = document.createElement('div');
+        footer.className = 'collab-footer';
+
+        const authorDiv = document.createElement('div');
+        authorDiv.style.display = 'flex';
+        authorDiv.style.alignItems = 'center';
+        authorDiv.style.gap = '8px';
+
+        const avatar = document.createElement('div');
+        avatar.className = 'collab-avatar';
+
+        // Logic to determine avatar letter
+        let avatarChar = 'U';
+        if (c.ownerId === currentUser?.id && currentUser.email) {
+            avatarChar = currentUser.email.charAt(0).toUpperCase();
+        } else if (c.contact && isNaN(parseInt(c.contact.charAt(0)))) {
+            // If contact starts with a letter (e.g. email or name)
+            avatarChar = c.contact.charAt(0).toUpperCase();
+        }
+
+        avatar.textContent = avatarChar;
+
+        const authorName = document.createElement('div');
+        authorName.className = 'small-muted';
+        authorName.style.fontWeight = '500';
+        authorName.textContent = c.contact || 'Anonymous';
+
+        authorDiv.append(avatar, authorName);
+
         const actions = document.createElement('div');
         actions.className = 'card-actions';
 
@@ -325,11 +370,16 @@ function renderCollabs(collabs, filter = null) {
         } else {
             const messageBtn = document.createElement('button');
             messageBtn.className = 'btn btn-primary';
-            messageBtn.textContent = '💬 Message';
+            messageBtn.style.padding = '6px 12px';
+            messageBtn.style.fontSize = '12px';
+            messageBtn.textContent = 'Message';
             messageBtn.addEventListener('click', () => openMessageModal(c));
             actions.append(messageBtn);
         }
-        card.append(head, tagwrap, desc, meta, actions);
+
+        footer.append(authorDiv, actions);
+
+        card.append(header, body, footer);
         grid.appendChild(card);
     }
 }
@@ -796,6 +846,19 @@ if (document.readyState === 'loading') {
 }
 
 function setupActionButtons() {
+    // Logout Button
+    const logoutBtn = qs('#logout-btn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', async () => {
+            if (confirm('Are you sure you want to log out?')) {
+                toast('Logging out...');
+                const { error } = await supabase.auth.signOut();
+                if (error) console.error('Error signing out:', error);
+                window.location.href = './login.html';
+            }
+        });
+    }
+
     // Sell Button
     const sellBtn = qs('#open-sell');
     if (sellBtn) {

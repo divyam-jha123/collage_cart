@@ -30,17 +30,20 @@
             font-family: Inter, system-ui, Segoe UI, Roboto, "Helvetica Neue", Arial;
             margin: 0;
             background: var(--bg);
-            color: var(--text)
+            color: var(--text);
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
         /* dark theme */
         body.dark {
-            --bg: #272e3a;
-            --card: #0f1720;
-            --muted: #7b8691;
-            --accent: #779ddb;
-            --text: #768fad;
-            --shadow: 0 6px 18px rgba(230, 209, 209, 0.6);
+            --bg: #1a1f2e;
+            --card: #252b3b;
+            --muted: #94a3b8;
+            --accent: #818cf8;
+            --accent-2: #34d399;
+            --text: #e2e8f0;
+            --shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+            --muted-2: #64748b;
         }
 
         .container {
@@ -55,7 +58,15 @@
             z-index: 30;
             background: linear-gradient(180deg, var(--card), rgba(255, 255, 255, 0.02));
             box-shadow: 0 2px 8px rgba(12, 17, 40, 0.04);
-            border-bottom: 1px solid rgba(15, 23, 42, 0.03)
+            border-bottom: 1px solid rgba(15, 23, 42, 0.03);
+            transition: background 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+        }
+
+        body.dark header.app-header {
+            background: linear-gradient(180deg, var(--card), rgba(37, 43, 59, 0.5));
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
         }
 
         .header-inner {
@@ -75,13 +86,24 @@
 
         .brand .project {
             font-weight: 700;
-            font-size: 18px
+            font-size: 18px;
+            color: var(--text);
+            transition: color 0.3s ease;
+        }
+
+        body.dark .brand .project {
+            color: var(--text);
         }
 
         .brand .college {
             font-size: 13px;
             color: var(--muted);
-            margin-top: 2px
+            margin-top: 2px;
+            transition: color 0.3s ease;
+        }
+
+        body.dark .brand .college {
+            color: var(--muted);
         }
 
         .header-actions {
@@ -92,28 +114,72 @@
 
         .btn {
             cursor: pointer;
-            padding: 8px 14px;
-            border-radius: 8px;
+            padding: 10px 20px;
+            border-radius: 10px;
             border: 0;
             background: transparent;
-            font-weight: 600
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
         }
 
         .btn-primary {
             background: var(--accent);
-            color: #fff
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(15, 98, 254, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(15, 98, 254, 0.4);
+        }
+
+        body.dark .btn-primary {
+            box-shadow: 0 2px 8px rgba(119, 157, 219, 0.3);
+        }
+
+        body.dark .btn-primary:hover {
+            box-shadow: 0 4px 12px rgba(119, 157, 219, 0.4);
         }
 
         .btn-ghost {
             background: transparent;
-            border: 1px solid rgba(15, 23, 42, 0.06)
+            border: 2px solid rgba(15, 23, 42, 0.1);
+            color: var(--text);
+        }
+
+        .btn-ghost:hover {
+            background: rgba(15, 23, 42, 0.05);
+            border-color: rgba(15, 23, 42, 0.15);
+        }
+
+        body.dark .btn-ghost {
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        body.dark .btn-ghost:hover {
+            background: rgba(255, 255, 255, 0.1);
         }
 
         .row {
             background: transparent;
             padding: 14px;
             margin-top: 18px;
-            border-radius: 10px
+            border-radius: 10px;
+        }
+
+        .row h2 {
+            color: var(--text);
+            font-weight: 700;
+            transition: color 0.3s ease;
+        }
+
+        body.dark .row h2 {
+            color: var(--text);
         }
 
         /* Sell section */
@@ -127,7 +193,14 @@
 
         .sell-row h2 {
             margin: 0;
-            font-size: 16px
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text);
+            transition: color 0.3s ease;
+        }
+
+        body.dark .sell-row h2 {
+            color: var(--text);
         }
 
         /* product grid */
@@ -140,10 +213,35 @@
 
         .search-input {
             flex: 1;
-            padding: 10px;
+            padding: 10px 14px;
             border-radius: 10px;
-            border: 1px solid rgba(15, 23, 42, 0.06);
-            background: #fff
+            border: 2px solid rgba(15, 23, 42, 0.1);
+            background: #fff;
+            color: var(--text);
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(15, 98, 254, 0.1);
+        }
+
+        body.dark .search-input {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.15);
+            color: var(--text);
+        }
+
+        body.dark .search-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.2);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        body.dark .search-input::placeholder {
+            color: var(--muted);
         }
 
         .product-grid {
@@ -160,14 +258,42 @@
             box-shadow: var(--shadow);
             display: flex;
             flex-direction: column;
-            gap: 8px
+            gap: 8px;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+
+        .product-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(29, 40, 75, 0.12);
+        }
+
+        body.dark .product-card {
+            border-color: rgba(255, 255, 255, 0.08);
+            background: var(--card);
+        }
+
+        body.dark .product-card:hover {
+            border-color: rgba(129, 140, 248, 0.3);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+            transform: translateY(-2px);
         }
 
         .product-card img {
             width: 100%;
             height: 140px;
             object-fit: cover;
-            border-radius: 8px
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        body.dark .product-card img {
+            opacity: 0.9;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        body.dark .product-card:hover img {
+            opacity: 1;
         }
 
         .meta {
@@ -179,13 +305,24 @@
         }
 
         .product-title {
-            font-weight: 700
+            font-weight: 700;
+            color: var(--text);
+            transition: color 0.3s ease;
+        }
+
+        body.dark .product-title {
+            color: var(--text);
         }
 
         .product-desc {
             font-size: 13px;
             color: var(--muted);
-            min-height: 36px
+            min-height: 36px;
+            transition: color 0.3s ease;
+        }
+
+        body.dark .product-desc {
+            color: var(--muted);
         }
 
         .card-actions {
@@ -196,11 +333,19 @@
 
         .chip {
             display: inline-block;
-            padding: 6px 8px;
+            padding: 6px 12px;
             border-radius: 999px;
             background: #f1f5f9;
             font-size: 12px;
-            color: var(--muted)
+            color: var(--muted);
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        body.dark .chip {
+            background: rgba(129, 140, 248, 0.15);
+            color: var(--accent);
+            border: 1px solid rgba(129, 140, 248, 0.2);
         }
 
         /* Collaboration */
@@ -218,7 +363,25 @@
             box-shadow: var(--shadow);
             display: flex;
             flex-direction: column;
-            gap: 8px
+            gap: 8px;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+
+        .collab-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(29, 40, 75, 0.12);
+        }
+
+        body.dark .collab-card {
+            border-color: rgba(255, 255, 255, 0.08);
+            background: var(--card);
+        }
+
+        body.dark .collab-card:hover {
+            border-color: rgba(129, 140, 248, 0.3);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+            transform: translateY(-2px);
         }
 
         .collab-meta {
@@ -238,30 +401,105 @@
         .modal-backdrop {
             position: fixed;
             inset: 0;
-            background: rgba(10, 11, 15, 0.35);
+            background: rgba(10, 11, 15, 0.5);
+            backdrop-filter: blur(4px);
             display: none;
             align-items: center;
             justify-content: center;
             padding: 20px;
-            z-index: 60
+            z-index: 60;
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        body.dark .modal-backdrop {
+            background: rgba(0, 0, 0, 0.7);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
         }
 
         .modal {
             background: var(--card);
-            max-width: 640px;
+            max-width: 700px;
             width: 100%;
-            padding: 16px;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(3, 7, 18, 0.2)
+            padding: 0;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(3, 7, 18, 0.3);
+            animation: slideUp 0.3s ease-out;
+            overflow: hidden;
+            border: 1px solid rgba(15, 23, 42, 0.08);
+        }
+
+        body.dark .modal {
+            border-color: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-header {
+            padding: 24px 24px 20px;
+            border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        body.dark .modal-header {
+            border-bottom-color: rgba(255, 255, 255, 0.1);
         }
 
         .modal h3 {
-            margin: 0 0 10px 0
+            margin: 0;
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: var(--muted);
+            transition: all 0.2s ease;
+            padding: 0;
+        }
+
+        .modal-close:hover {
+            background: rgba(15, 23, 42, 0.06);
+            color: var(--text);
+            transform: rotate(90deg);
+        }
+
+        body.dark .modal-close:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-body {
+            padding: 24px;
         }
 
         .form-row {
             display: flex;
-            gap: 10px;
+            gap: 20px;
             flex-wrap: wrap;
             align-items: flex-start;
         }
@@ -270,33 +508,145 @@
         .form-col {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 18px;
             flex: 1;
+            min-width: 280px;
         }
 
         .form-side {
-            width: 220px;
+            width: 240px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .form-group {
             display: flex;
             flex-direction: column;
             gap: 8px;
         }
 
+        label {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text);
+            display: block;
+            margin-bottom: 0;
+        }
+
+        body.dark label {
+            color: var(--text);
+        }
+
         .form-input {
-            padding: 8px;
-            border-radius: 8px;
-            border: 1px solid rgba(15, 23, 42, 0.06);
-            background: #fff
+            padding: 12px 14px;
+            border-radius: 10px;
+            border: 2px solid rgba(15, 23, 42, 0.1);
+            background: var(--card);
+            color: var(--text);
+            font-size: 15px;
+            font-family: inherit;
+            transition: all 0.2s ease;
+            width: 100%;
+        }
+
+        body.dark .form-input {
+            border-color: rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(15, 98, 254, 0.1);
+            background: var(--card);
+        }
+
+        body.dark .form-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(119, 157, 219, 0.2);
+        }
+
+        .form-input::placeholder {
+            color: var(--muted);
+            opacity: 0.7;
+        }
+
+        textarea.form-input {
+            resize: vertical;
+            min-height: 100px;
+            font-family: inherit;
         }
 
         .form-input[type="file"] {
-            padding: 6px;
+            padding: 0;
+            border: none;
+            background: transparent;
+            cursor: pointer;
         }
 
-        label {
-            font-size: 13px;
+        .file-upload-area {
+            border: 2px dashed rgba(15, 23, 42, 0.15);
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+            background: rgba(15, 23, 42, 0.02);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        body.dark .file-upload-area {
+            border-color: rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .file-upload-area:hover {
+            border-color: var(--accent);
+            background: rgba(15, 98, 254, 0.05);
+        }
+
+        body.dark .file-upload-area:hover {
+            background: rgba(119, 157, 219, 0.1);
+        }
+
+        .file-upload-area.dragover {
+            border-color: var(--accent);
+            background: rgba(15, 98, 254, 0.1);
+            transform: scale(1.02);
+        }
+
+        .file-upload-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+            opacity: 0.6;
+        }
+
+        .file-upload-text {
+            font-size: 14px;
             color: var(--muted);
-            display: block;
-            margin-bottom: 6px
+            margin-bottom: 4px;
+        }
+
+        .file-upload-hint {
+            font-size: 12px;
+            color: var(--muted);
+            opacity: 0.7;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+        }
+
+        .file-input-wrapper input[type="file"] {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            top: 0;
+            left: 0;
         }
 
         .small {
@@ -304,16 +654,62 @@
             color: var(--muted)
         }
 
+        .modal-footer {
+            padding: 20px 24px;
+            border-top: 1px solid rgba(15, 23, 42, 0.08);
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            background: rgba(15, 23, 42, 0.02);
+        }
+
+        body.dark .modal-footer {
+            border-top-color: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .contact-modal-img {
+            transition: all 0.3s ease;
+        }
+
+        body.dark .contact-modal-img {
+            border-color: rgba(255, 255, 255, 0.15) !important;
+        }
+
         .footer-actions {
             display: flex;
-            gap: 8px;
+            gap: 12px;
             justify-content: flex-end;
-            margin-top: 8px
+        }
+
+        .img-preview {
+            margin-top: 12px;
+            position: relative;
         }
 
         .img-preview img {
-            max-width: 180px;
-            border-radius: 8px;
+            width: 100%;
+            max-width: 100%;
+            height: auto;
+            max-height: 200px;
+            object-fit: cover;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border: 2px solid rgba(15, 23, 42, 0.08);
+        }
+
+        body.dark .img-preview img {
+            border-color: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .img-preview-empty {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 120px;
+            color: var(--muted);
         }
 
         /* responsive */
@@ -353,6 +749,18 @@
             .form-side {
                 width: 100%
             }
+
+            .modal-header {
+                padding: 20px;
+            }
+
+            .modal-body {
+                padding: 20px;
+            }
+
+            .modal-footer {
+                padding: 16px 20px;
+            }
         }
 
         /* small helpers */
@@ -370,7 +778,22 @@
             border: 0;
             cursor: pointer;
             padding: 6px;
-            border-radius: 8px
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            color: var(--text);
+        }
+
+        .icon-btn:hover {
+            background: rgba(15, 23, 42, 0.06);
+            transform: scale(1.1);
+        }
+
+        body.dark .icon-btn {
+            color: var(--text);
+        }
+
+        body.dark .icon-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
         }
 
         .menu {
@@ -383,7 +806,14 @@
             background: #fff4e6;
             color: #92400e;
             padding: 6px 8px;
-            border-radius: 8px
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        body.dark .tag-sport {
+            background: rgba(52, 211, 153, 0.15);
+            color: #34d399;
+            border: 1px solid rgba(52, 211, 153, 0.2);
         }
 
         .toast {
@@ -392,10 +822,30 @@
             bottom: 20px;
             background: #111;
             color: #fff;
-            padding: 10px 14px;
-            border-radius: 8px;
+            padding: 12px 18px;
+            border-radius: 12px;
             display: none;
-            z-index: 70
+            z-index: 70;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            animation: slideInRight 0.3s ease-out;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        body.dark .toast {
+            background: #252b3b;
+            color: var(--text);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
         }
 
         .empty-state {
@@ -403,7 +853,15 @@
             border-radius: 12px;
             background: linear-gradient(180deg, var(--card), rgba(255, 255, 255, 0.02));
             text-align: center;
-            color: var(--muted)
+            color: var(--muted);
+            border: 1px dashed rgba(15, 23, 42, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        body.dark .empty-state {
+            background: linear-gradient(180deg, var(--card), rgba(37, 43, 59, 0.3));
+            border-color: rgba(255, 255, 255, 0.1);
+            color: var(--muted);
         }
     </style>
 </head>
@@ -542,14 +1000,6 @@
                 const contactBtn = document.createElement('button'); contactBtn.className = 'btn btn-ghost'; contactBtn.textContent = 'Contact Seller';
                 contactBtn.addEventListener('click', () => openContactModal(p));
                 actions.append(contactBtn);
-                // only owner can edit/delete
-                if (p.ownerId === deviceId) {
-                    const editBtn = document.createElement('button'); editBtn.className = 'icon-btn'; editBtn.title = 'Edit';
-                    editBtn.innerHTML = '✏️'; editBtn.addEventListener('click', () => openSellModal(p));
-                    const delBtn = document.createElement('button'); delBtn.className = 'icon-btn'; delBtn.title = 'Delete';
-                    delBtn.innerHTML = '🗑️'; delBtn.addEventListener('click', () => deleteProduct(p.id));
-                    actions.append(editBtn, delBtn);
-                }
                 card.append(img, title, desc, sellerRow, meta, actions);
                 grid.appendChild(card);
             }
@@ -568,15 +1018,15 @@
                 const desc = document.createElement('div'); desc.className = 'product-desc'; desc.textContent = c.desc;
                 const meta = document.createElement('div'); meta.className = 'small-muted'; meta.textContent = 'Posted by: ' + (c.contact || 'Anonymous');
                 const actions = document.createElement('div'); actions.className = 'card-actions';
-                const joinBtn = document.createElement('button'); joinBtn.className = 'btn btn-primary'; joinBtn.textContent = `Join (${c.joined || 0})`;
-                joinBtn.addEventListener('click', () => toggleJoin(c.id));
-                actions.append(joinBtn);
-                // only owner can edit/delete
-                if (c.ownerId === deviceId) {
-                    const editBtn = document.createElement('button'); editBtn.className = 'icon-btn'; editBtn.innerHTML = '✏️'; editBtn.addEventListener('click', () => openCollabModal(c));
-                    const delBtn = document.createElement('button'); delBtn.className = 'icon-btn'; delBtn.innerHTML = '🗑️'; delBtn.addEventListener('click', () => deleteCollab(c.id));
-                    actions.append(editBtn, delBtn);
-                }
+                const messageBtn = document.createElement('button'); messageBtn.className = 'btn btn-primary'; messageBtn.textContent = '💬 Message';
+                messageBtn.addEventListener('click', () => openMessageModal(c));
+                actions.append(messageBtn);
+                // only owner can delete
+                // if (c.ownerId === deviceId) {
+                //     const delBtn = document.createElement('button'); delBtn.className = 'icon-btn'; delBtn.innerHTML = '🗑️'; delBtn.title = 'Delete';
+                //     delBtn.addEventListener('click', () => deleteCollab(c.id));
+                //     actions.append(delBtn);
+                // }
                 card.append(head, tagwrap, desc, meta, actions);
                 grid.appendChild(card);
             }
@@ -626,41 +1076,110 @@
         function openSellModal(product = null) {
             const isEdit = !!product;
             const html = `
-        <h3 id="modal-title">${isEdit ? 'Edit Product' : 'Sell Your Product'}</h3>
-        <form id="sell-form">
-          <div class="form-row">
-            <div class="form-col">
-              <label>Product Title<input class="form-input" name="title" required value="${product ? escapeHtml(product.title) : ''}"/></label>
-              <div style="display:flex;gap:10px">
-                <label style="flex:1">Price<input class="form-input" name="price" required value="${product ? escapeHtml(product.price) : ''}"/></label>
-                <label style="flex:1">Seller Name<input class="form-input" name="seller" required value="${product ? escapeHtml(product.seller) : ''}"/></label>
+        <div class="modal-header">
+          <h3 id="modal-title">${isEdit ? '✏️ Edit Product' : '🛒 Sell Your Product'}</h3>
+          <button class="modal-close" id="modal-close" aria-label="Close">✕</button>
+        </div>
+        <div class="modal-body">
+          <form id="sell-form">
+            <div class="form-row">
+              <div class="form-col">
+                <div class="form-group">
+                  <label for="title">Product Title</label>
+                  <input class="form-input" id="title" name="title" type="text" required placeholder="e.g. Physics Notes (Sem1)" value="${product ? escapeHtml(product.title) : ''}"/>
+                </div>
+                <div style="display:flex;gap:12px">
+                  <div class="form-group" style="flex:1">
+                    <label for="price">Price</label>
+                    <input class="form-input" id="price" name="price" type="text" required placeholder="₹200" value="${product ? escapeHtml(product.price) : ''}"/>
+                  </div>
+                  <div class="form-group" style="flex:1">
+                    <label for="seller">Seller Name</label>
+                    <input class="form-input" id="seller" name="seller" type="text" required placeholder="Your name" value="${product ? escapeHtml(product.seller) : ''}"/>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="desc">Description</label>
+                  <textarea class="form-input" id="desc" name="desc" rows="4" placeholder="Describe your product... (e.g. Handwritten neat notes, 40 pages, excellent condition)">${product ? escapeHtml(product.desc) : ''}</textarea>
+                </div>
+                <div class="form-group">
+                  <label for="contact">Contact (email/phone)</label>
+                  <input class="form-input" id="contact" name="contact" type="text" required placeholder="your.email@vedam.edu or +91..." value="${product ? escapeHtml(product.contact) : ''}"/>
+                </div>
               </div>
-              <label>Description<textarea class="form-input" name="desc" rows="3" placeholder="Short description">${product ? escapeHtml(product.desc) : ''}</textarea></label>
-              <label>Contact (email/phone)<input class="form-input" name="contact" required value="${product ? escapeHtml(product.contact) : ''}"/></label>
+              <div class="form-side">
+                <div class="form-group">
+                  <label>Product Image</label>
+                  <div class="file-upload-area" id="file-upload-area">
+                    <div class="file-input-wrapper">
+                      <input id="img-input" type="file" accept="image/*" />
+                      <div class="file-upload-icon">📷</div>
+                      <div class="file-upload-text">Click to upload or drag & drop</div>
+                      <div class="file-upload-hint">PNG, JPG up to 5MB</div>
+                    </div>
+                  </div>
+                  <div id="img-preview" class="img-preview">${product && product.img ? `<img src="${product.img}" alt="Product preview" />` : '<div class="img-preview-empty">No image selected</div>'}</div>
+                </div>
+              </div>
             </div>
-            <div class="form-side">
-              <label>Image<input id="img-input" type="file" accept="image/*" class="form-input" /></label>
-              <div id="img-preview" class="img-preview">${product && product.img ? `<img src="${product.img}" style="max-width:180px;border-radius:8px" />` : ''}</div>
-            </div>
-          </div>
+          </form>
+        </div>
+        <div class="modal-footer">
           <div class="footer-actions">
             <button type="button" class="btn btn-ghost" id="cancel-sell">Cancel</button>
-            <button type="submit" class="btn btn-primary">${isEdit ? 'Save' : 'Add Product'}</button>
+            <button type="submit" form="sell-form" class="btn btn-primary">${isEdit ? '💾 Save Changes' : '➕ Add Product'}</button>
           </div>
-        </form>
+        </div>
       `;
             openModal(html);
             // after open bind handlers
             const form = qs('#sell-form');
             const fileInput = qs('#img-input');
+            const fileUploadArea = qs('#file-upload-area');
+            const imgPreview = qs('#img-preview');
             let imgData = product && product.img ? product.img : '';
-            fileInput.addEventListener('change', () => {
-                const f = fileInput.files && fileInput.files[0];
-                if (!f) return;
-                const reader = new FileReader();
-                reader.onload = e => { imgData = e.target.result; qs('#img-preview').innerHTML = `<img src="${imgData}" style="max-width:180px;border-radius:8px" />`; }
-                reader.readAsDataURL(f);
+            
+            // Close button
+            qs('#modal-close').addEventListener('click', closeModal);
+            
+            // File input change
+            fileInput.addEventListener('change', handleFileSelect);
+            
+            // Drag and drop
+            fileUploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                fileUploadArea.classList.add('dragover');
             });
+            
+            fileUploadArea.addEventListener('dragleave', () => {
+                fileUploadArea.classList.remove('dragover');
+            });
+            
+            fileUploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                fileUploadArea.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    fileInput.files = files;
+                    handleFileSelect({ target: fileInput });
+                }
+            });
+            
+            function handleFileSelect(e) {
+                const f = e.target.files && e.target.files[0];
+                if (!f) return;
+                if (f.size > 5 * 1024 * 1024) {
+                    alert('File size must be less than 5MB');
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = e => {
+                    imgData = e.target.result;
+                    imgPreview.innerHTML = `<img src="${imgData}" alt="Product preview" />`;
+                };
+                reader.readAsDataURL(f);
+            }
+            
             qs('#cancel-sell').addEventListener('click', closeModal);
             form.addEventListener('submit', (ev) => {
                 ev.preventDefault();
@@ -741,20 +1260,65 @@
         /************ Contact modal ************/
         function openContactModal(product) {
             const html = `
-        <h3>Contact Seller</h3>
-        <div style="display:flex;gap:10px;align-items:center">
-          <img src="${product.img || placeholderFor(product.title)}" style="width:110px;height:70px;object-fit:cover;border-radius:8px" alt="" />
-          <div>
-            <div style="font-weight:700">${product.title}</div>
-            <div class="small-muted">Seller: ${product.seller}</div>
-            <div class="small-muted">Price: ${product.price}</div>
-            <div style="margin-top:10px"><a class="btn btn-primary" href="mailto:${encodeURIComponent(product.contact)}?subject=${encodeURIComponent('Interested in ' + product.title)}&body=${encodeURIComponent('Hi ' + product.seller + ',%0D%0A%0D%0AI am interested in your product ' + product.title + ' listed on CampusConnect.%0D%0APrice: ' + product.price + '%0D%0APlease let me know when I can pick it up on Vedam floor.%0D%0AThanks.')}" id="mailto">Open mail app</a></div>
+        <div class="modal-header">
+          <h3>📧 Contact Seller</h3>
+          <button class="modal-close" id="contact-modal-close" aria-label="Close">✕</button>
+        </div>
+        <div class="modal-body">
+          <div style="display:flex;gap:16px;align-items:flex-start">
+            <img src="${product.img || placeholderFor(product.title)}" class="contact-modal-img" style="width:140px;height:100px;object-fit:cover;border-radius:12px;border:2px solid rgba(15, 23, 42, 0.1)" alt="${escapeHtml(product.title)}" />
+            <div style="flex:1">
+              <div style="font-weight:700;font-size:18px;color:var(--text);margin-bottom:8px">${escapeHtml(product.title)}</div>
+              <div class="small-muted" style="margin-bottom:4px">Seller: ${escapeHtml(product.seller)}</div>
+              <div class="small-muted" style="margin-bottom:12px">Price: <strong style="color:var(--accent)">${escapeHtml(product.price)}</strong></div>
+              <a class="btn btn-primary" href="mailto:${encodeURIComponent(product.contact)}?subject=${encodeURIComponent('Interested in ' + product.title)}&body=${encodeURIComponent('Hi ' + product.seller + ',%0D%0A%0D%0AI am interested in your product ' + product.title + ' listed on CampusConnect.%0D%0APrice: ' + product.price + '%0D%0APlease let me know when I can pick it up on Vedam floor.%0D%0AThanks.')}" id="mailto" style="text-decoration:none;display:inline-block">📨 Open Mail App</a>
+            </div>
           </div>
         </div>
-        <div style="margin-top:12px" class="footer-actions"><button class="btn btn-ghost" id="close-contact">Close</button></div>
+        <div class="modal-footer">
+          <div class="footer-actions">
+            <button class="btn btn-ghost" id="close-contact">Close</button>
+          </div>
+        </div>
       `;
             openModal(html);
+            qs('#contact-modal-close').addEventListener('click', closeModal);
             qs('#close-contact').addEventListener('click', closeModal);
+        }
+
+        /************ Message modal for collaboration ************/
+        function openMessageModal(collab) {
+            const html = `
+        <div class="modal-header">
+          <h3>💬 Message Poster</h3>
+          <button class="modal-close" id="message-modal-close" aria-label="Close">✕</button>
+        </div>
+        <div class="modal-body">
+          <div style="display:flex;flex-direction:column;gap:16px">
+            <div>
+              <div style="font-weight:700;font-size:18px;color:var(--text);margin-bottom:8px">${escapeHtml(collab.title)}</div>
+              ${collab.cat ? `<div style="margin-bottom:8px"><span class="chip">${escapeHtml(collab.cat)}</span></div>` : ''}
+              <div class="small-muted" style="margin-bottom:8px">${escapeHtml(collab.desc)}</div>
+              <div class="small-muted" style="margin-bottom:12px">Posted by: ${escapeHtml(collab.contact || 'Anonymous')}</div>
+            </div>
+            ${collab.contact ? `
+              <a class="btn btn-primary" href="mailto:${encodeURIComponent(collab.contact)}?subject=${encodeURIComponent('Re: ' + collab.title)}&body=${encodeURIComponent('Hi,%0D%0A%0D%0AI am interested in your collaboration post: ' + collab.title + '%0D%0A%0D%0A' + (collab.desc || '') + '%0D%0A%0D%0APlease let me know how I can get involved.%0D%0AThanks.')}" id="mailto" style="text-decoration:none;display:inline-block;text-align:center">📨 Open Mail App</a>
+            ` : `
+              <div class="small-muted" style="text-align:center;padding:12px;background:rgba(15, 23, 42, 0.05);border-radius:8px">
+                No contact information available
+              </div>
+            `}
+          </div>
+        </div>
+        <div class="modal-footer">
+          <div class="footer-actions">
+            <button class="btn btn-ghost" id="close-message">Close</button>
+          </div>
+        </div>
+      `;
+            openModal(html);
+            qs('#message-modal-close').addEventListener('click', closeModal);
+            qs('#close-message').addEventListener('click', closeModal);
         }
 
         /************ Edit/Delete/Join functions (ownership enforced) ************/

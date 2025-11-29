@@ -1,0 +1,818 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>CampusConnect — Sell & Collaborate (Vedam)</title>
+    <meta name="description" content="Vedam campus sell & collaborate single-page app (localStorage)" />
+    <style>
+        :root {
+            --bg: #f6f8fb;
+            --card: #ffffff;
+            --muted: #6b7280;
+            --accent: #0f62fe;
+            --accent-2: #0aa99c;
+            --maxw: 1100px;
+            --radius: 12px;
+            --gap: 16px;
+            --shadow: 0 6px 18px rgba(29, 40, 75, 0.06);
+            --success: #16a34a;
+            --text: #111;
+            --muted-2: #9aa0a6;
+        }
+ 
+        * {
+            box-sizing: border-box
+        }
+
+        body {
+            font-family: Inter, system-ui, Segoe UI, Roboto, "Helvetica Neue", Arial;
+            margin: 0;
+            background: var(--bg);
+            color: var(--text)
+        }
+
+        /* dark theme */
+        body.dark {
+            --bg: #272e3a;
+            --card: #0f1720;
+            --muted: #7b8691;
+            --accent: #779ddb;
+            --text: #768fad;
+            --shadow: 0 6px 18px rgba(230, 209, 209, 0.6);
+        }
+
+        .container {
+            max-width: var(--maxw);
+            margin: 20px auto;
+            padding: 18px
+        }
+
+        header.app-header {
+            position: sticky;
+            top: 0;
+            z-index: 30;
+            background: linear-gradient(180deg, var(--card), rgba(255, 255, 255, 0.02));
+            box-shadow: 0 2px 8px rgba(12, 17, 40, 0.04);
+            border-bottom: 1px solid rgba(15, 23, 42, 0.03)
+        }
+
+        .header-inner {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            justify-content: space-between;
+            padding: 12px 18px;
+            max-width: var(--maxw);
+            margin: 0 auto
+        }
+
+        .brand {
+            display: flex;
+            flex-direction: column
+        }
+
+        .brand .project {
+            font-weight: 700;
+            font-size: 18px
+        }
+
+        .brand .college {
+            font-size: 13px;
+            color: var(--muted);
+            margin-top: 2px
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center
+        }
+
+        .btn {
+            cursor: pointer;
+            padding: 8px 14px;
+            border-radius: 8px;
+            border: 0;
+            background: transparent;
+            font-weight: 600
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #fff
+        }
+
+        .btn-ghost {
+            background: transparent;
+            border: 1px solid rgba(15, 23, 42, 0.06)
+        }
+
+        .row {
+            background: transparent;
+            padding: 14px;
+            margin-top: 18px;
+            border-radius: 10px
+        }
+
+        /* Sell section */
+        .sell-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 8px
+        }
+
+        .sell-row h2 {
+            margin: 0;
+            font-size: 16px
+        }
+
+        /* product grid */
+        .search-bar {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin: 12px 0
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid rgba(15, 23, 42, 0.06);
+            background: #fff
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+            margin-top: 12px
+        }
+
+        .product-card {
+            background: var(--card);
+            padding: 12px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            gap: 8px
+        }
+
+        .product-card img {
+            width: 100%;
+            height: 140px;
+            object-fit: cover;
+            border-radius: 8px
+        }
+
+        .meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            color: var(--muted)
+        }
+
+        .product-title {
+            font-weight: 700
+        }
+
+        .product-desc {
+            font-size: 13px;
+            color: var(--muted);
+            min-height: 36px
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center
+        }
+
+        .chip {
+            display: inline-block;
+            padding: 6px 8px;
+            border-radius: 999px;
+            background: #f1f5f9;
+            font-size: 12px;
+            color: var(--muted)
+        }
+
+        /* Collaboration */
+        .collab-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+            margin-top: 12px
+        }
+
+        .collab-card {
+            background: var(--card);
+            padding: 12px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            gap: 8px
+        }
+
+        .collab-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px
+        }
+
+        .tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap
+        }
+
+        /* modal */
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(10, 11, 15, 0.35);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            z-index: 60
+        }
+
+        .modal {
+            background: var(--card);
+            max-width: 640px;
+            width: 100%;
+            padding: 16px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(3, 7, 18, 0.2)
+        }
+
+        .modal h3 {
+            margin: 0 0 10px 0
+        }
+
+        .form-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: flex-start;
+        }
+
+        /* improved layout for sell modal */
+        .form-col {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            flex: 1;
+        }
+
+        .form-side {
+            width: 220px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-input {
+            padding: 8px;
+            border-radius: 8px;
+            border: 1px solid rgba(15, 23, 42, 0.06);
+            background: #fff
+        }
+
+        .form-input[type="file"] {
+            padding: 6px;
+        }
+
+        label {
+            font-size: 13px;
+            color: var(--muted);
+            display: block;
+            margin-bottom: 6px
+        }
+
+        .small {
+            font-size: 13px;
+            color: var(--muted)
+        }
+
+        .footer-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+            margin-top: 8px
+        }
+
+        .img-preview img {
+            max-width: 180px;
+            border-radius: 8px;
+        }
+
+        /* responsive */
+        @media (max-width: 960px) {
+
+            .product-grid,
+            .collab-grid {
+                grid-template-columns: repeat(2, 1fr)
+            }
+
+            .form-side {
+                width: 180px
+            }
+        }
+
+        @media (max-width: 640px) {
+            .header-inner {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+                padding: 12px
+            }
+
+            .product-grid,
+            .collab-grid {
+                grid-template-columns: 1fr
+            }
+
+            .modal {
+                max-width: 90%
+            }
+
+            .form-row {
+                flex-direction: column
+            }
+
+            .form-side {
+                width: 100%
+            }
+        }
+
+        /* small helpers */
+        .muted {
+            color: var(--muted)
+        }
+
+        .small-muted {
+            font-size: 12px;
+            color: var(--muted)
+        }
+
+        .icon-btn {
+            background: transparent;
+            border: 0;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 8px
+        }
+
+        .menu {
+            display: flex;
+            gap: 6px;
+            align-items: center
+        }
+
+        .tag-sport {
+            background: #fff4e6;
+            color: #92400e;
+            padding: 6px 8px;
+            border-radius: 8px
+        }
+
+        .toast {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            background: #111;
+            color: #fff;
+            padding: 10px 14px;
+            border-radius: 8px;
+            display: none;
+            z-index: 70
+        }
+
+        .empty-state {
+            padding: 24px;
+            border-radius: 12px;
+            background: linear-gradient(180deg, var(--card), rgba(255, 255, 255, 0.02));
+            text-align: center;
+            color: var(--muted)
+        }
+    </style>
+</head>
+
+<body>
+    <header class="app-header" role="banner">
+        <div class="header-inner">
+            <div class="brand" aria-hidden="false">
+                <div class="project">CampusConnect</div>
+                <div class="college">Vedam School of Technology — ADYPU Vedam</div>
+            </div>
+
+            <div class="header-actions" role="navigation" aria-label="Header actions">
+                <button class="btn btn-ghost" id="btn-buy" title="Scroll to items">Buy</button>
+                <!-- changed Sell -> Collaboration -->
+                <button class="btn btn-primary" id="btn-collab" title="Go to collaboration">Collaboration</button>
+                <!-- theme toggle -->
+                <button class="btn icon-btn" id="theme-toggle" title="Toggle theme">🌙</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container" id="main">
+        <!-- ROW 2 Sell Section -->
+        <section class="row sell-row" id="sell-section" aria-labelledby="sell-title">
+            <h2 id="sell-title">Items for Sale</h2>
+            <div style="display:flex;gap:10px;align-items:center">
+                <input id="product-search" class="search-input" placeholder="Search products (title/description)" />
+                <button class="btn btn-primary" id="open-sell">+ Sell Your Product</button>
+            </div>
+        </section>
+
+        <!-- ROW 3 Product Grid -->
+        <section id="products" class="row" aria-labelledby="products-title">
+            <div id="product-grid" class="product-grid" role="list"></div>
+            <div id="products-empty" class="empty-state" style="display:none;margin-top:12px">No products yet. Click
+                <strong>+ Sell Your Product</strong> to add the first item.
+            </div>
+        </section>
+
+        <!-- ROW 4 Collaboration heading -->
+        <section class="row" aria-labelledby="collab-title">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+                <h2 id="collab-title">Collaboration / Invitations</h2>
+                <div style="display:flex;gap:10px;align-items:center">
+                    <!-- removed fixed category chips - category will be entered by user -->
+                    <button class="btn btn-primary" id="open-collab">+ Create Invite</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ROW 5 Collaboration Grid -->
+        <section id="collabs" class="row" aria-labelledby="collab-list">
+            <div id="collab-grid" class="collab-grid" role="list"></div>
+            <div id="collabs-empty" class="empty-state" style="display:none;margin-top:12px">No collaboration posts yet.
+                Click <strong>+ Create Invite</strong> to post one.</div>
+        </section>
+    </main>
+
+    <!-- Modals -->
+    <div id="modal-backdrop" class="modal-backdrop" aria-hidden="true">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+            <!-- dynamic content -->
+            <div id="modal-content"></div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <script>
+        /************ Device & Storage helpers ************/
+        const DEVICE_KEY = 'campus_connect_device_id';
+        function getDeviceId() {
+            let id = localStorage.getItem(DEVICE_KEY);
+            if (!id) { id = 'dev_' + Math.random().toString(36).slice(2, 9); localStorage.setItem(DEVICE_KEY, id); }
+            return id;
+        }
+        const deviceId = getDeviceId();
+
+        /************ Utility helpers ************/
+        const qs = s => document.querySelector(s);
+        const qsa = s => Array.from(document.querySelectorAll(s));
+        const toast = (t) => { const el = qs('#toast'); el.textContent = t; el.style.display = 'block'; setTimeout(() => el.style.display = 'none', 2200) }
+        const timeAgo = (ts) => {
+            const diff = Math.floor((Date.now() - ts) / 1000);
+            if (diff < 60) return diff + 's ago';
+            if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+            if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+            return Math.floor(diff / 86400) + 'd ago';
+        }
+        const uid = () => 'id' + Math.random().toString(36).slice(2, 9);
+
+        /************ Storage keys and sample data ************/
+        const STORAGE_PRODUCTS = 'campus_connect_products';
+        const STORAGE_COLLABS = 'campus_connect_collabs';
+        const STORAGE_THEME = 'campus_connect_theme';
+
+        const sampleProducts = [
+            { id: uid(), title: 'Physics Notes (Sem1)', price: '₹50', desc: 'Handwritten neat notes. 40 pages.', seller: 'Ravi', contact: 'ravi@vedam.edu', img: '', ts: Date.now() - 1000 * 60 * 30, ownerId: deviceId },
+            { id: uid(), title: 'Charger Type-C', price: '₹200', desc: 'Genuine cable, lightly used.', seller: 'Neha', contact: 'neha@vedam.edu', img: '', ts: Date.now() - 1000 * 60 * 60 * 2, ownerId: 'dev_other' },
+            { id: uid(), title: 'Pocket Calculator', price: '₹150', desc: 'Casio-style calculator.', seller: 'Aman', contact: 'aman@vedam.edu', img: '', ts: Date.now() - 1000 * 60 * 5, ownerId: 'dev_other2' }
+        ];
+        const sampleCollabs = [
+            { id: uid(), title: 'Need 2 for Hackathon', cat: 'Hackathon', desc: 'Forming a team for InnovEdam. Need 1 dev and 1 designer.', contact: 'teamlead@vedam.edu', joined: 1, ts: Date.now() - 1000 * 60 * 90, ownerId: 'dev_other' },
+            { id: uid(), title: 'Sunday Cricket Match', cat: 'Cricket', desc: 'Casual 7-a-side. Need 3 players, Sunday 4pm.', contact: 'sports@vedam.edu', joined: 2, ts: Date.now() - 1000 * 60 * 240, ownerId: deviceId },
+            { id: uid(), title: 'Dance Team for Cultural Fest', cat: 'Dance', desc: 'Looking for 4 dancers and 1 choreographer.', contact: 'dance@vedam.edu', joined: 0, ts: Date.now() - 1000 * 60 * 60 * 5, ownerId: 'dev_other2' }
+        ];
+
+        /************ Data helpers ************/
+        function loadData() {
+            let products = JSON.parse(localStorage.getItem(STORAGE_PRODUCTS) || 'null');
+            let collabs = JSON.parse(localStorage.getItem(STORAGE_COLLABS) || 'null');
+            if (!products || !Array.isArray(products)) { products = sampleProducts; localStorage.setItem(STORAGE_PRODUCTS, JSON.stringify(products)) }
+            if (!collabs || !Array.isArray(collabs)) { collabs = sampleCollabs; localStorage.setItem(STORAGE_COLLABS, JSON.stringify(collabs)) }
+            return { products, collabs };
+        }
+        function saveProducts(products) { localStorage.setItem(STORAGE_PRODUCTS, JSON.stringify(products)) }
+        function saveCollabs(collabs) { localStorage.setItem(STORAGE_COLLABS, JSON.stringify(collabs)) }
+
+        /************ Renderers (show edit/delete only for owner) ************/
+        function renderProducts(products) {
+            const grid = qs('#product-grid');
+            grid.innerHTML = '';
+            if (!products.length) { qs('#products-empty').style.display = 'block'; return } else qs('#products-empty').style.display = 'none';
+            products.sort((a, b) => b.ts - a.ts);
+            for (const p of products) {
+                const card = document.createElement('article'); card.className = 'product-card'; card.setAttribute('role', 'listitem');
+                const img = document.createElement('img'); img.alt = p.title; img.src = p.img || placeholderFor(p.title);
+                const title = document.createElement('div'); title.className = 'product-title'; title.textContent = p.title;
+                const desc = document.createElement('div'); desc.className = 'product-desc'; desc.textContent = p.desc;
+                const meta = document.createElement('div'); meta.className = 'meta';
+                meta.innerHTML = `<div><strong>${p.price}</strong></div><div class="small-muted">${timeAgo(p.ts)}</div>`;
+                const sellerRow = document.createElement('div'); sellerRow.className = 'small-muted'; sellerRow.textContent = 'Seller: ' + p.seller;
+                const actions = document.createElement('div'); actions.className = 'card-actions';
+                const contactBtn = document.createElement('button'); contactBtn.className = 'btn btn-ghost'; contactBtn.textContent = 'Contact Seller';
+                contactBtn.addEventListener('click', () => openContactModal(p));
+                actions.append(contactBtn);
+                // only owner can edit/delete
+                if (p.ownerId === deviceId) {
+                    const editBtn = document.createElement('button'); editBtn.className = 'icon-btn'; editBtn.title = 'Edit';
+                    editBtn.innerHTML = '✏️'; editBtn.addEventListener('click', () => openSellModal(p));
+                    const delBtn = document.createElement('button'); delBtn.className = 'icon-btn'; delBtn.title = 'Delete';
+                    delBtn.innerHTML = '🗑️'; delBtn.addEventListener('click', () => deleteProduct(p.id));
+                    actions.append(editBtn, delBtn);
+                }
+                card.append(img, title, desc, sellerRow, meta, actions);
+                grid.appendChild(card);
+            }
+        }
+        function renderCollabs(collabs, filter = null) {
+            const grid = qs('#collab-grid'); grid.innerHTML = '';
+            let list = collabs.slice().sort((a, b) => b.ts - a.ts);
+            if (filter) list = list.filter(c => (c.cat || '').toLowerCase().includes(filter.toLowerCase()));
+            if (!list.length) { qs('#collabs-empty').style.display = 'block'; return } else qs('#collabs-empty').style.display = 'none';
+            for (const c of list) {
+                const card = document.createElement('article'); card.className = 'collab-card'; card.setAttribute('role', 'listitem');
+                const head = document.createElement('div'); head.className = 'collab-meta';
+                head.innerHTML = `<div style="font-weight:700">${c.title}</div><div class="small-muted">${timeAgo(c.ts)}</div>`;
+                const tagwrap = document.createElement('div'); tagwrap.className = 'tags';
+                if (c.cat) { const tag = document.createElement('span'); tag.className = 'chip'; tag.textContent = c.cat; tagwrap.appendChild(tag); }
+                const desc = document.createElement('div'); desc.className = 'product-desc'; desc.textContent = c.desc;
+                const meta = document.createElement('div'); meta.className = 'small-muted'; meta.textContent = 'Posted by: ' + (c.contact || 'Anonymous');
+                const actions = document.createElement('div'); actions.className = 'card-actions';
+                const joinBtn = document.createElement('button'); joinBtn.className = 'btn btn-primary'; joinBtn.textContent = `Join (${c.joined || 0})`;
+                joinBtn.addEventListener('click', () => toggleJoin(c.id));
+                actions.append(joinBtn);
+                // only owner can edit/delete
+                if (c.ownerId === deviceId) {
+                    const editBtn = document.createElement('button'); editBtn.className = 'icon-btn'; editBtn.innerHTML = '✏️'; editBtn.addEventListener('click', () => openCollabModal(c));
+                    const delBtn = document.createElement('button'); delBtn.className = 'icon-btn'; delBtn.innerHTML = '🗑️'; delBtn.addEventListener('click', () => deleteCollab(c.id));
+                    actions.append(editBtn, delBtn);
+                }
+                card.append(head, tagwrap, desc, meta, actions);
+                grid.appendChild(card);
+            }
+        }
+
+        /************ Placeholder image generator (simple base64 svg) ************/
+        function placeholderFor(text = 'Item') {
+            const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='500' height='300'><rect width='100%' height='100%' fill='#eef2ff'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-size='20' fill='#333'>${esc(text)}</text></svg>`;
+            return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+        }
+
+        /************ Actions ************/
+        let state = loadData();
+        renderProducts(state.products);
+        renderCollabs(state.collabs);
+
+        // header buttons
+        qs('#btn-buy').addEventListener('click', () => document.getElementById('products').scrollIntoView({ behavior: 'smooth' }));
+        qs('#btn-collab').addEventListener('click', () => document.getElementById('collabs').scrollIntoView({ behavior: 'smooth' }));
+
+        // open forms
+        qs('#open-sell').addEventListener('click', () => openSellModal());
+        qs('#open-collab').addEventListener('click', () => openCollabModal());
+
+        // search
+        qs('#product-search').addEventListener('input', (e) => {
+            const q = e.target.value.trim().toLowerCase();
+            const filtered = state.products.filter(p => p.title.toLowerCase().includes(q) || p.desc.toLowerCase().includes(q));
+            renderProducts(filtered);
+        });
+
+        /************ Modal builders ************/
+        const modalBack = qs('#modal-backdrop');
+        function openModal(html) {
+            qs('#modal-content').innerHTML = html;
+            modalBack.style.display = 'flex'; modalBack.setAttribute('aria-hidden', 'false');
+            // focus first input if exists
+            const firstInput = modalBack.querySelector('input, textarea, button');
+            if (firstInput) firstInput.focus();
+        }
+        function closeModal() { modalBack.style.display = 'none'; modalBack.setAttribute('aria-hidden', 'true'); qs('#modal-content').innerHTML = ''; }
+
+        modalBack.addEventListener('click', (e) => { if (e.target === modalBack) closeModal(); });
+
+        /************ Sell product modal/form (fixed layout) ************/
+        function openSellModal(product = null) {
+            const isEdit = !!product;
+            const html = `
+        <h3 id="modal-title">${isEdit ? 'Edit Product' : 'Sell Your Product'}</h3>
+        <form id="sell-form">
+          <div class="form-row">
+            <div class="form-col">
+              <label>Product Title<input class="form-input" name="title" required value="${product ? escapeHtml(product.title) : ''}"/></label>
+              <div style="display:flex;gap:10px">
+                <label style="flex:1">Price<input class="form-input" name="price" required value="${product ? escapeHtml(product.price) : ''}"/></label>
+                <label style="flex:1">Seller Name<input class="form-input" name="seller" required value="${product ? escapeHtml(product.seller) : ''}"/></label>
+              </div>
+              <label>Description<textarea class="form-input" name="desc" rows="3" placeholder="Short description">${product ? escapeHtml(product.desc) : ''}</textarea></label>
+              <label>Contact (email/phone)<input class="form-input" name="contact" required value="${product ? escapeHtml(product.contact) : ''}"/></label>
+            </div>
+            <div class="form-side">
+              <label>Image<input id="img-input" type="file" accept="image/*" class="form-input" /></label>
+              <div id="img-preview" class="img-preview">${product && product.img ? `<img src="${product.img}" style="max-width:180px;border-radius:8px" />` : ''}</div>
+            </div>
+          </div>
+          <div class="footer-actions">
+            <button type="button" class="btn btn-ghost" id="cancel-sell">Cancel</button>
+            <button type="submit" class="btn btn-primary">${isEdit ? 'Save' : 'Add Product'}</button>
+          </div>
+        </form>
+      `;
+            openModal(html);
+            // after open bind handlers
+            const form = qs('#sell-form');
+            const fileInput = qs('#img-input');
+            let imgData = product && product.img ? product.img : '';
+            fileInput.addEventListener('change', () => {
+                const f = fileInput.files && fileInput.files[0];
+                if (!f) return;
+                const reader = new FileReader();
+                reader.onload = e => { imgData = e.target.result; qs('#img-preview').innerHTML = `<img src="${imgData}" style="max-width:180px;border-radius:8px" />`; }
+                reader.readAsDataURL(f);
+            });
+            qs('#cancel-sell').addEventListener('click', closeModal);
+            form.addEventListener('submit', (ev) => {
+                ev.preventDefault();
+                const fd = new FormData(form);
+                const obj = {
+                    id: product ? product.id : uid(),
+                    title: fd.get('title').trim(),
+                    price: fd.get('price').trim(),
+                    seller: fd.get('seller').trim(),
+                    desc: fd.get('desc').trim(),
+                    contact: fd.get('contact').trim(),
+                    img: imgData,
+                    ts: product ? product.ts : Date.now(),
+                    ownerId: product ? product.ownerId : deviceId
+                };
+                if (!obj.title || !obj.price) { alert('Please fill title and price'); return; }
+                if (product) {
+                    state.products = state.products.map(p => p.id === product.id ? obj : p);
+                } else {
+                    state.products.unshift(obj);
+                }
+                saveProducts(state.products);
+                renderProducts(state.products);
+                toast(product ? 'Product updated' : 'Product added');
+                closeModal();
+            });
+        }
+
+        /************ Collab modal/form (category free text) ************/
+        function openCollabModal(collab = null) {
+            const isEdit = !!collab;
+            const html = `
+        <h3 id="modal-title">${isEdit ? 'Edit Invite' : 'Create Invitation'}</h3>
+        <form id="collab-form">
+          <div class="form-row">
+            <div class="form-col">
+              <label>Title<input class="form-input" name="title" required value="${collab ? escapeHtml(collab.title) : ''}"/></label>
+              <div style="display:flex;gap:10px">
+                <label style="flex:1">Category (enter your own)<input class="form-input" name="cat" value="${collab ? escapeHtml(collab.cat) : ''}" placeholder="e.g. Hackathon, Cricket, Study" /></label>
+                <label style="flex:1">Contact<input class="form-input" name="contact" value="${collab ? escapeHtml(collab.contact) : ''}"/></label>
+              </div>
+              <label>Description<textarea class="form-input" name="desc" rows="3">${collab ? escapeHtml(collab.desc) : ''}</textarea></label>
+            </div>
+          </div>
+          <div class="footer-actions">
+            <button type="button" class="btn btn-ghost" id="cancel-collab">Cancel</button>
+            <button type="submit" class="btn btn-primary">${isEdit ? 'Save' : 'Create'}</button>
+          </div>
+        </form>
+      `;
+            openModal(html);
+            qs('#cancel-collab').addEventListener('click', closeModal);
+            qs('#collab-form').addEventListener('submit', (ev) => {
+                ev.preventDefault();
+                const fd = new FormData(ev.currentTarget);
+                const obj = {
+                    id: collab ? collab.id : uid(),
+                    title: fd.get('title').trim(),
+                    cat: fd.get('cat') ? fd.get('cat').trim() : '',
+                    desc: fd.get('desc').trim(),
+                    contact: fd.get('contact').trim(),
+                    joined: collab ? collab.joined || 0 : 0,
+                    ts: collab ? collab.ts : Date.now(),
+                    ownerId: collab ? collab.ownerId : deviceId
+                };
+                if (collab) {
+                    state.collabs = state.collabs.map(c => c.id === collab.id ? obj : c);
+                } else {
+                    state.collabs.unshift(obj);
+                }
+                saveCollabs(state.collabs);
+                renderCollabs(state.collabs);
+                toast(collab ? 'Invite updated' : 'Invite created');
+                closeModal();
+            });
+        }
+
+        /************ Contact modal ************/
+        function openContactModal(product) {
+            const html = `
+        <h3>Contact Seller</h3>
+        <div style="display:flex;gap:10px;align-items:center">
+          <img src="${product.img || placeholderFor(product.title)}" style="width:110px;height:70px;object-fit:cover;border-radius:8px" alt="" />
+          <div>
+            <div style="font-weight:700">${product.title}</div>
+            <div class="small-muted">Seller: ${product.seller}</div>
+            <div class="small-muted">Price: ${product.price}</div>
+            <div style="margin-top:10px"><a class="btn btn-primary" href="mailto:${encodeURIComponent(product.contact)}?subject=${encodeURIComponent('Interested in ' + product.title)}&body=${encodeURIComponent('Hi ' + product.seller + ',%0D%0A%0D%0AI am interested in your product ' + product.title + ' listed on CampusConnect.%0D%0APrice: ' + product.price + '%0D%0APlease let me know when I can pick it up on Vedam floor.%0D%0AThanks.')}" id="mailto">Open mail app</a></div>
+          </div>
+        </div>
+        <div style="margin-top:12px" class="footer-actions"><button class="btn btn-ghost" id="close-contact">Close</button></div>
+      `;
+            openModal(html);
+            qs('#close-contact').addEventListener('click', closeModal);
+        }
+
+        /************ Edit/Delete/Join functions (ownership enforced) ************/
+        function deleteProduct(id) {
+            const p = state.products.find(x => x.id === id);
+            if (!p) return;
+            if (p.ownerId !== deviceId) { alert('Only the creator can delete this product.'); return; }
+            if (!confirm('Delete this product?')) return;
+            state.products = state.products.filter(p => p.id !== id);
+            saveProducts(state.products); renderProducts(state.products);
+            toast('Product removed');
+        }
+        function deleteCollab(id) {
+            const c = state.collabs.find(x => x.id === id);
+            if (!c) return;
+            if (c.ownerId !== deviceId) { alert('Only the creator can delete this invite.'); return; }
+            if (!confirm('Delete this invite?')) return;
+            state.collabs = state.collabs.filter(c => c.id !== id);
+            saveCollabs(state.collabs); renderCollabs(state.collabs);
+            toast('Invitation removed');
+        }
+        function toggleJoin(id) {
+            state.collabs = state.collabs.map(c => {
+                if (c.id === id) { c.joined = (c.joined || 0) + 1; }
+                return c;
+            });
+            saveCollabs(state.collabs); renderCollabs(state.collabs);
+            toast('Joined!');
+        }
+
+        /************ Helpers ************/
+        function escapeHtml(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') }
+        function exportData() { return { products: state.products, collabs: state.collabs } } // developer helper
+        // expose for debugging in console
+        window.exportData = exportData;
+
+        /************ Theme toggle ************/
+        function applyThemeFromStorage() {
+            const t = localStorage.getItem(STORAGE_THEME) || 'light';
+            if (t === 'dark') document.body.classList.add('dark'); else document.body.classList.remove('dark');
+            qs('#theme-toggle').textContent = t === 'dark' ? '☀️' : '🌙';
+        }
+        applyThemeFromStorage();
+        qs('#theme-toggle').addEventListener('click', () => {
+            const isDark = document.body.classList.toggle('dark');
+            localStorage.setItem(STORAGE_THEME, isDark ? 'dark' : 'light');
+            qs('#theme-toggle').textContent = isDark ? '☀️' : '🌙';
+        });
+
+        /************ Edit open helpers ************/
+        function openSellModalById(id) { const p = state.products.find(x => x.id === id); if (p) openSellModal(p) }
+        function openCollabById(id) { const c = state.collabs.find(x => x.id === id); if (c) openCollabModal(c) }
+
+        /************ Onload attach keyboard shortcuts for demo convenience ************/
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+        });
+    </script>
+</body>
+
+</html>

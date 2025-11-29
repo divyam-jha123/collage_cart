@@ -22,9 +22,12 @@
       <p class="subtitle">Secure Login Access</p>
     </div>
 
-    <button class="theme-toggle" id="theme-toggle" title="Toggle theme" aria-label="Toggle dark mode">
-      <span class="theme-icon">🌙</span>
-    </button>
+    <div class="theme-switch-wrapper" id="theme-toggle-wrapper" title="Toggle theme">
+      <label class="theme-switch" for="checkbox">
+        <input type="checkbox" id="checkbox" />
+        <div class="slider round"></div>
+      </label>
+    </div>
 
     <form id="login-form">
       <div class="form-group">
@@ -60,32 +63,33 @@
       const btn = document.getElementById('theme-toggle');
       const storageKey = 'login_theme'; // Keeping separate storage key as per original code
 
+      const toggleWrapper = document.getElementById('theme-toggle-wrapper');
+      const checkbox = document.getElementById('checkbox');
+
       function applyTheme() {
         const theme = localStorage.getItem(storageKey) || 'light';
-        const icon = btn ? btn.querySelector('.theme-icon') : null;
-
         if (theme === 'dark') {
           document.body.classList.add('dark');
-          if (icon) icon.textContent = '☀️';
+          if (checkbox) checkbox.checked = true;
         } else {
           document.body.classList.remove('dark');
-          if (icon) icon.textContent = '🌙';
+          if (checkbox) checkbox.checked = false;
         }
       }
 
-      if (btn) {
-        const newBtn = btn.cloneNode(true);
-        btn.parentNode.replaceChild(newBtn, btn);
-
-        newBtn.addEventListener('click', function () {
-          const isDark = document.body.classList.toggle('dark');
-          localStorage.setItem(storageKey, isDark ? 'dark' : 'light');
-          const icon = newBtn.querySelector('.theme-icon');
-          if (icon) icon.textContent = isDark ? '☀️' : '🌙';
+      if (checkbox) {
+        checkbox.addEventListener('change', (e) => {
+          if (e.target.checked) {
+            document.body.classList.add('dark');
+            localStorage.setItem(storageKey, 'dark');
+          } else {
+            document.body.classList.remove('dark');
+            localStorage.setItem(storageKey, 'light');
+          }
         });
-
-        applyTheme();
       }
+
+      applyTheme();
     })();
   </script>
   <script src="particles.js"></script>

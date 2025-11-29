@@ -65,7 +65,7 @@ async function loadItems() {
             price: `₹${item.price}`,
             desc: item.description || '',
             seller: 'Seller', // We'll get this from user metadata
-            contact: item.seller_id, // For now, use seller_id
+            contact: item.contact_info || item.seller_id,
             img: item.image_url || '',
             ts: new Date(item.created_at).getTime(),
             ownerId: item.seller_id,
@@ -113,6 +113,7 @@ async function saveItem(item, isEdit = false) {
             price: parseFloat(item.price.replace(/[₹,]/g, '')) || 0,
             image_url: item.img || null,
             category: item.category || null,
+            contact_info: item.contact,
             is_active: true,
             seller_id: currentUser.id
         };
@@ -245,17 +246,26 @@ function renderProducts(products) {
 
         if (p.ownerId === currentUser?.id) {
             const editBtn = document.createElement('button');
-            editBtn.className = 'icon-btn';
-            editBtn.innerHTML = '✏️';
+            editBtn.className = 'btn-action btn-edit';
+            editBtn.innerHTML = '<img src="./edit-icon.png" alt="Edit" />';
             editBtn.title = 'Edit';
-            editBtn.addEventListener('click', () => openSellModal(p));
+            editBtn.addEventListener('click', () => {
+                openSellModal(p);
+            });
 
             const delBtn = document.createElement('button');
-            delBtn.className = 'icon-btn';
-            delBtn.innerHTML = '🗑️';
+            delBtn.className = 'btn-action btn-delete';
+            delBtn.innerHTML = '<img src="./delete-icon.png" alt="Delete" />';
             delBtn.title = 'Delete';
-            delBtn.style.color = '#ef4444';
-            delBtn.addEventListener('click', () => deleteProduct(p.id));
+            delBtn.addEventListener('click', async () => {
+                if (confirm('Are you sure you want to delete this item?')) {
+                    const success = await deleteItem(p.id);
+                    if (success) {
+                        toast('Item deleted');
+                        await refreshData();
+                    }
+                }
+            });
 
             actions.append(editBtn, delBtn);
         } else {
@@ -354,16 +364,15 @@ function renderCollabs(collabs, filter = null) {
 
         if (c.ownerId === currentUser?.id) {
             const editBtn = document.createElement('button');
-            editBtn.className = 'icon-btn';
-            editBtn.innerHTML = '✏️';
+            editBtn.className = 'btn-action btn-edit';
+            editBtn.innerHTML = '<img src="./edit-icon.png" alt="Edit" />';
             editBtn.title = 'Edit';
             editBtn.addEventListener('click', () => openCollabModal(c));
 
             const delBtn = document.createElement('button');
-            delBtn.className = 'icon-btn';
-            delBtn.innerHTML = '🗑️';
+            delBtn.className = 'btn-action btn-delete';
+            delBtn.innerHTML = '<img src="./delete-icon.png" alt="Delete" />';
             delBtn.title = 'Delete';
-            delBtn.style.color = '#ef4444';
             delBtn.addEventListener('click', () => deleteCollab(c.id));
 
             actions.append(editBtn, delBtn);
@@ -429,51 +438,63 @@ function openSellModal(product = null) {
           <h3 id="modal-title">${isEdit ? '✏️ Edit Product' : '🛒 Sell Your Product'}</h3>
           <button class="modal-close" id="modal-close" aria-label="Close">✕</button>
         </div>
-        <div class="modal-body">
+        <div class="modal-body" style="padding: 24px;">
           <form id="sell-form">
-            <div class="form-row">
-              <div class="form-col">
+            <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 24px;">
+              
+              <!-- Left Column: Details -->
+              <div style="display: flex; flex-direction: column; gap: 16px;">
                 <div class="form-group">
-                  <label for="title">Product Title</label>
-                  <input class="form-input" id="title" name="title" type="text" required placeholder="e.g. Physics Notes (Sem1)" value="${product ? escapeHtml(product.title) : ''}"/>
+                  <label for="title" style="font-weight: 600; color: var(--text); margin-bottom: 6px; display: block;">Product Title</label>
+                  <input class="form-input" id="title" name="title" type="text" required placeholder="e.g. Physics Notes (Sem1)" value="${product ? escapeHtml(product.title) : ''}" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid rgba(15,23,42,0.1);"/>
                 </div>
-                <div style="display:flex;gap:12px">
-                  <div class="form-group" style="flex:1">
-                    <label for="price">Price (₹)</label>
-                    <input class="form-input" id="price" name="price" type="number" required placeholder="200" value="${product ? escapeHtml(product.price.replace(/[₹,]/g, '')) : ''}"/>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                  <div class="form-group">
+                    <label for="price" style="font-weight: 600; color: var(--text); margin-bottom: 6px; display: block;">Price (₹)</label>
+                    <input class="form-input" id="price" name="price" type="number" required placeholder="200" value="${product ? escapeHtml(product.price.replace(/[₹,]/g, '')) : ''}" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid rgba(15,23,42,0.1);"/>
                   </div>
-                  <div class="form-group" style="flex:1">
-                    <label for="category">Category</label>
-                    <input class="form-input" id="category" name="category" type="text" placeholder="Electronics, Books, etc." value="${product ? escapeHtml(product.category || '') : ''}"/>
+                  <div class="form-group">
+                    <label for="contact" style="font-weight: 600; color: var(--text); margin-bottom: 6px; display: block;">Contact Number</label>
+                    <input class="form-input" id="contact" name="contact" type="text" required placeholder="9876543210" value="${product ? escapeHtml(product.contact || '') : ''}" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid rgba(15,23,42,0.1);"/>
                   </div>
                 </div>
+
                 <div class="form-group">
-                  <label for="desc">Description</label>
-                  <textarea class="form-input" id="desc" name="desc" rows="4" placeholder="Describe your product...">${product ? escapeHtml(product.desc) : ''}</textarea>
+                  <label for="category" style="font-weight: 600; color: var(--text); margin-bottom: 6px; display: block;">Category</label>
+                  <input class="form-input" id="category" name="category" type="text" placeholder="Electronics, Books, etc." value="${product ? escapeHtml(product.category || '') : ''}" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid rgba(15,23,42,0.1);"/>
+                </div>
+
+                <div class="form-group">
+                  <label for="desc" style="font-weight: 600; color: var(--text); margin-bottom: 6px; display: block;">Description</label>
+                  <textarea class="form-input" id="desc" name="desc" rows="4" placeholder="Describe your product..." style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid rgba(15,23,42,0.1); resize: vertical;">${product ? escapeHtml(product.desc) : ''}</textarea>
                 </div>
               </div>
-              <div class="form-side">
-                <div class="form-group">
-                  <label>Product Image</label>
-                  <div class="file-upload-area" id="file-upload-area">
-                    <div class="file-input-wrapper">
-                      <input id="img-input" type="file" accept="image/*" />
-                      <div class="file-upload-icon">📷</div>
-                      <div class="file-upload-text">Click to upload or drag & drop</div>
-                      <div class="file-upload-hint">PNG, JPG up to 5MB</div>
+
+              <!-- Right Column: Image -->
+              <div style="display: flex; flex-direction: column; gap: 16px;">
+                <div class="form-group" style="height: 100%; display: flex; flex-direction: column;">
+                  <label style="font-weight: 600; color: var(--text); margin-bottom: 6px; display: block;">Product Image</label>
+                  <div class="file-upload-area" id="file-upload-area" style="flex: 1; border: 2px dashed rgba(15,23,42,0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; background: rgba(15,23,42,0.02); transition: all 0.2s ease; min-height: 200px; position: relative; overflow: hidden;">
+                    <div class="file-input-wrapper" style="text-align: center; padding: 20px;">
+                      <input id="img-input" type="file" accept="image/*" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 10;" />
+                      <div class="file-upload-icon" style="font-size: 32px; margin-bottom: 8px;">📷</div>
+                      <div class="file-upload-text" style="font-weight: 500; color: var(--text);">Click or Drop Image</div>
+                      <div class="file-upload-hint" style="font-size: 12px; color: var(--muted); margin-top: 4px;">PNG, JPG up to 5MB</div>
+                    </div>
+                    <div id="img-preview" class="img-preview" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;">
+                      ${product && product.img ? `<img src="${product.img}" alt="Product preview" style="width: 100%; height: 100%; object-fit: cover;" />` : ''}
                     </div>
                   </div>
-                  <div id="img-preview" class="img-preview">${product && product.img ? `<img src="${product.img}" alt="Product preview" />` : '<div class="img-preview-empty">No image selected</div>'}</div>
                 </div>
               </div>
+
             </div>
           </form>
         </div>
-        <div class="modal-footer">
-          <div class="footer-actions">
-            <button type="button" class="btn btn-ghost" id="cancel-sell">Cancel</button>
-            <button type="submit" form="sell-form" class="btn btn-primary">${isEdit ? '💾 Save Changes' : '➕ Add Product'}</button>
-          </div>
+        <div class="modal-footer" style="padding: 16px 24px; border-top: 1px solid rgba(15,23,42,0.05); display: flex; justify-content: flex-end; gap: 12px;">
+          <button type="button" class="btn btn-ghost" id="cancel-sell">Cancel</button>
+          <button type="submit" form="sell-form" class="btn btn-primary" style="min-width: 120px;">${isEdit ? '💾 Save Changes' : '➕ Add Product'}</button>
         </div>
       `;
     openModal(html);
@@ -533,12 +554,13 @@ function openSellModal(product = null) {
             title: fd.get('title').trim(),
             price: `₹${fd.get('price').trim()}`,
             desc: fd.get('desc').trim(),
+            contact: fd.get('contact').trim(),
             img: imgData,
             category: fd.get('category').trim() || null
         };
 
-        if (!obj.title || !fd.get('price')) {
-            alert('Please fill title and price');
+        if (!obj.title || !fd.get('price') || !obj.contact) {
+            alert('Please fill title, price, and contact');
             submitBtn.disabled = false;
             submitBtn.textContent = originalText;
             return;
@@ -643,6 +665,47 @@ function openCollabModal(collab = null) {
     });
 }
 
+/**
+ * Helper to format WhatsApp links robustly
+ * Handles:
+ * - Leading zeros (098...) -> 9198...
+ * - International format (+91...) -> 91...
+ * - Local 10-digit -> 91...
+ */
+function formatWhatsAppLink(contact, message) {
+    if (!contact) return null;
+
+    // 1. Keep only digits and +
+    let clean = contact.replace(/[^\d+]/g, '');
+
+    // 2. Check for international format (starts with +)
+    let isInternational = clean.startsWith('+');
+
+    // 3. Remove all non-digits for the final URL
+    let phone = clean.replace(/\D/g, '');
+
+    // 4. Remove leading zeros (common user error: 098...)
+    phone = phone.replace(/^0+/, '');
+
+    // 5. If it was NOT international (no +) and is exactly 10 digits, assume India (+91)
+    if (!isInternational && phone.length === 10) {
+        phone = '91' + phone;
+    }
+
+    // 6. Validation: WhatsApp numbers are generally 10-15 digits
+    if (phone.length < 10 || phone.length > 15) {
+        console.warn('Phone number invalid length for WhatsApp:', phone.length, phone);
+        return null; // Invalid, caller should show fallback
+    }
+
+    const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+
+    return `<a class="btn btn-primary" href="${url}" target="_blank" style="text-decoration:none;display:flex;justify-content:center;align-items:center;gap:8px;background-color:#25D366;border-color:#25D366;color:white;width:100%;padding:12px 20px;font-size:16px;font-weight:600">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+        Message
+    </a>`;
+}
+
 /************ Contact modal ************/
 function openContactModal(product) {
     const isEmail = product.contact && product.contact.includes('@');
@@ -651,33 +714,58 @@ function openContactModal(product) {
     if (isEmail) {
         actionBtn = `<a class="btn btn-primary" href="mailto:${encodeURIComponent(product.contact)}?subject=${encodeURIComponent('Interested in ' + product.title)}" style="text-decoration:none;display:inline-block">📨 Open Mail App</a>`;
     } else if (product.contact) {
-        let phone = product.contact.replace(/\D/g, '');
-        if (phone.length === 10) phone = '91' + phone;
-        const msg = "hi i am intersted to buy your item can be talk";
-        const waUrl = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
-        actionBtn = `<a class="btn btn-primary" href="${waUrl}" target="_blank" style="text-decoration:none;display:inline-block;background-color:#25D366;border-color:#25D366;color:white">💬 Chat on WhatsApp</a>`;
+        const msg = "Hi, I am interested to buy your item. Can we talk?";
+        const waBtn = formatWhatsAppLink(product.contact, msg);
+
+        if (waBtn) {
+            actionBtn = waBtn;
+        } else {
+            // Fallback: Check if it looks like a UUID (invalid data from before fix)
+            if (product.contact.length > 30 && product.contact.includes('-')) {
+                actionBtn = `<div class="small-muted" style="text-align:center;padding:12px;background:rgba(15, 23, 42, 0.05);border-radius:8px">Contact info not available for this item</div>`;
+            } else {
+                // Show other contact info (e.g. Discord ID, Email)
+                actionBtn = `<div class="btn btn-ghost" style="cursor:default;user-select:all;width:100%">Contact: ${escapeHtml(product.contact)}</div>`;
+            }
+        }
     }
 
     const html = `
         <div class="modal-header">
-          <h3>📧 Contact Seller</h3>
+          <h3>Contact Seller</h3>
           <button class="modal-close" id="contact-modal-close" aria-label="Close">✕</button>
         </div>
-        <div class="modal-body">
-          <div style="display:flex;gap:16px;align-items:flex-start">
-            <img src="${product.img || placeholderFor(product.title)}" class="contact-modal-img" style="width:140px;height:100px;object-fit:cover;border-radius:12px;border:2px solid rgba(15, 23, 42, 0.1)" alt="${escapeHtml(product.title)}" />
-            <div style="flex:1">
-              <div style="font-weight:700;font-size:18px;color:var(--text);margin-bottom:8px">${escapeHtml(product.title)}</div>
-              <div class="small-muted" style="margin-bottom:4px">Seller: ${escapeHtml(product.seller || 'User')}</div>
-              <div class="small-muted" style="margin-bottom:12px">Price: <strong style="color:var(--accent)">${escapeHtml(product.price)}</strong></div>
-              ${actionBtn || '<p class="small-muted">Contact information not available</p>'}
+        <div class="modal-body" style="padding: 24px;">
+          
+          <!-- Product Hero -->
+          <div style="display: flex; gap: 20px; margin-bottom: 24px; align-items: center;">
+            <img src="${product.img || placeholderFor(product.title)}" 
+                 style="width: 80px; height: 80px; object-fit: cover; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border: 1px solid rgba(15,23,42,0.05);" 
+                 alt="${escapeHtml(product.title)}" />
+            <div>
+              <h4 style="margin: 0 0 4px 0; font-size: 18px; font-weight: 700; color: var(--text);">${escapeHtml(product.title)}</h4>
+              <div style="font-size: 16px; font-weight: 600; color: var(--accent);">${escapeHtml(product.price)}</div>
+              <div class="small-muted" style="margin-top: 4px; font-size: 13px;">${escapeHtml(product.category || 'General')}</div>
             </div>
           </div>
-        </div>
-        <div class="modal-footer">
-          <div class="footer-actions">
-            <button class="btn btn-ghost" id="close-contact">Close</button>
+
+          <!-- Seller Info Block -->
+          <div style="background: rgba(15, 23, 42, 0.03); padding: 16px; border-radius: 12px; margin-bottom: 24px; display: flex; align-items: center; gap: 12px; border: 1px solid rgba(15,23,42,0.05);">
+            <div style="width: 40px; height: 40px; background: var(--accent); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px;">
+              ${(product.seller || 'S').charAt(0).toUpperCase()}
+            </div>
+            <div>
+              <div style="font-weight: 500; color: var(--text); font-size: 15px;">Seller: ${escapeHtml(product.seller || 'Campus User')}</div>
+              <div class="small-muted" style="font-size: 12px;">Verified Student</div>
+            </div>
           </div>
+
+          <!-- Action Area -->
+          <div style="display: flex; flex-direction: column; gap: 12px;">
+            ${actionBtn ? actionBtn.replace('display:inline-block', 'display:flex;justify-content:center;width:100%;padding:12px 20px;font-size:16px;font-weight:600') : '<div class="small-muted" style="text-align:center">Contact information not available</div>'}
+            <button class="btn btn-ghost" id="close-contact" style="width:100%">Cancel</button>
+          </div>
+
         </div>
       `;
     openModal(html);
@@ -693,11 +781,15 @@ function openMessageModal(collab) {
         if (isEmail) {
             actionBtn = `<a class="btn btn-primary" href="mailto:${encodeURIComponent(collab.contact)}?subject=${encodeURIComponent('Re: ' + collab.title)}" style="text-decoration:none;display:inline-block;text-align:center">📨 Open Mail App</a>`;
         } else {
-            let phone = collab.contact.replace(/\D/g, '');
-            if (phone.length === 10) phone = '91' + phone;
-            const msg = "hi i am intersted to join your team can be talk";
-            const waUrl = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
-            actionBtn = `<a class="btn btn-primary" href="${waUrl}" target="_blank" style="text-decoration:none;display:inline-block;background-color:#25D366;border-color:#25D366;color:white">💬 Chat on WhatsApp</a>`;
+
+            const msg = "Hi, I am interested to join your team. Can we talk?";
+            const waBtn = formatWhatsAppLink(collab.contact, msg);
+
+            if (waBtn) {
+                actionBtn = waBtn;
+            } else {
+                actionBtn = `<div class="btn btn-ghost" style="cursor:default;user-select:all">Contact: ${escapeHtml(collab.contact)}</div>`;
+            }
         }
     } else {
         actionBtn = `<div class="small-muted" style="text-align:center;padding:12px;background:rgba(15, 23, 42, 0.05);border-radius:8px">No contact information available</div>`;

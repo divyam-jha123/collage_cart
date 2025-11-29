@@ -193,38 +193,57 @@ body.dark .login-btn:hover {
     box-shadow: 0 8px 20px rgba(129, 140, 248, 0.35);
 }
 
-.theme-toggle {
+/* Theme Switch Slider */
+.theme-switch-wrapper {
     position: absolute;
-    top: 24px;
-    right: 24px;
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
-    border: 1px solid rgba(15, 23, 42, 0.1);
-    background: rgba(255, 255, 255, 0.5);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-    transition: all 0.2s ease;
-    backdrop-filter: blur(4px);
+    top: 20px;
+    right: 20px;
     z-index: 10;
 }
 
-body.dark .theme-toggle {
-    border-color: rgba(255, 255, 255, 0.1);
-    background: rgba(255, 255, 255, 0.05);
-    color: #fff;
+.theme-switch {
+    display: inline-block;
+    height: 26px;
+    position: relative;
+    width: 50px;
 }
 
-.theme-toggle:hover {
-    background: rgba(255, 255, 255, 0.8);
-    transform: scale(1.05);
+.theme-switch input {
+    display: none;
 }
 
-body.dark .theme-toggle:hover {
-    background: rgba(255, 255, 255, 0.15);
+.slider {
+    background-color: #ccc;
+    bottom: 0;
+    cursor: pointer;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    transition: .4s;
+    border-radius: 34px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.slider:before {
+    background-color: white;
+    bottom: 4px;
+    content: "";
+    height: 18px;
+    left: 4px;
+    position: absolute;
+    transition: .4s;
+    width: 18px;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+body.dark .slider {
+    background-color: var(--accent);
+}
+
+body.dark .slider:before {
+    transform: translateX(24px);
 }
 
 /* Animations */
@@ -246,6 +265,21 @@ body.dark .theme-toggle:hover {
 
 @media (max-width: 600px) {
     .container {
-        padding: 32px 24px;
+        padding: 40px 25px;
+    }
+
+    .college-name {
+        font-size: 24px;
+    }
+
+    .logo {
+        width: 70px;
+        height: 70px;
+        font-size: 35px;
+    }
+
+    .theme-switch-wrapper {
+        top: 15px;
+        right: 15px;
     }
 }

@@ -1,102 +1,267 @@
-/************ Device & Storage helpers ************/
-const DEVICE_KEY = 'campus_connect_device_id';
-function getDeviceId() {
-    let id = localStorage.getItem(DEVICE_KEY);
-    if (!id) { id = 'dev_' + Math.random().toString(36).slice(2, 9); localStorage.setItem(DEVICE_KEY, id); }
-    return id;
-}
-const deviceId = getDeviceId();
+// Import Supabase client
+import { supabase } from './supabaseClient.js';
 
 /************ Utility helpers ************/
 const qs = s => document.querySelector(s);
 const qsa = s => Array.from(document.querySelectorAll(s));
 const toast = (t) => { const el = qs('#toast'); el.textContent = t; el.style.display = 'block'; setTimeout(() => el.style.display = 'none', 2200) }
 const timeAgo = (ts) => {
-    const diff = Math.floor((Date.now() - ts) / 1000);
+    if (!ts) return 'Just now';
+    const tsDate = new Date(ts);
+    const diff = Math.floor((Date.now() - tsDate.getTime()) / 1000);
     if (diff < 60) return diff + 's ago';
     if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
     if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
     return Math.floor(diff / 86400) + 'd ago';
 }
-const uid = () => 'id' + Math.random().toString(36).slice(2, 9);
-
-/************ Storage keys and sample data ************/
-const STORAGE_PRODUCTS = 'campus_connect_products_v2';
-const STORAGE_COLLABS = 'campus_connect_collabs_v2';
 const STORAGE_THEME = 'campus_connect_theme';
 
-const sampleProducts = [
-    { id: uid(), title: 'Physics Notes (Sem1)', price: '₹50', desc: 'Handwritten neat notes. 40 pages.', seller: 'Ravi', contact: '9876543210', img: 'https://image.pollinations.ai/prompt/handwritten%20physics%20notes%20on%20paper', ts: Date.now() - 1000 * 60 * 30, ownerId: deviceId },
-    { id: uid(), title: 'Charger Type-C', price: '₹200', desc: 'Genuine cable, lightly used.', seller: 'Neha', contact: '9876543211', img: 'https://image.pollinations.ai/prompt/usb%20type%20c%20charger%20cable', ts: Date.now() - 1000 * 60 * 60 * 2, ownerId: 'dev_other' },
-    { id: uid(), title: 'Pocket Calculator', price: '₹150', desc: 'Casio-style calculator.', seller: 'Aman', contact: '9876543212', img: 'https://image.pollinations.ai/prompt/scientific%20calculator', ts: Date.now() - 1000 * 60 * 5, ownerId: 'dev_other2' }
-];
-const sampleCollabs = [
-    { id: uid(), title: 'Need 2 for Hackathon', cat: 'Hackathon', desc: 'Forming a team for InnovEdam. Need 1 dev and 1 designer.', contact: '9876543213', joined: 1, ts: Date.now() - 1000 * 60 * 90, ownerId: 'dev_other' },
-    { id: uid(), title: 'Sunday Cricket Match', cat: 'Cricket', desc: 'Casual 7-a-side. Need 3 players, Sunday 4pm.', contact: 'sports@vedam.edu', joined: 2, ts: Date.now() - 1000 * 60 * 240, ownerId: deviceId },
-    { id: uid(), title: 'Dance Team for Cultural Fest', cat: 'Dance', desc: 'Looking for 4 dancers and 1 choreographer.', contact: '9876543214', joined: 0, ts: Date.now() - 1000 * 60 * 60 * 5, ownerId: 'dev_other2' }
-];
 
-/************ Data helpers ************/
-function loadData() {
-    let products = JSON.parse(localStorage.getItem(STORAGE_PRODUCTS) || 'null');
-    let collabs = JSON.parse(localStorage.getItem(STORAGE_COLLABS) || 'null');
+// Current user
+let currentUser = null;
 
-    if (!products || !Array.isArray(products)) {
-        products = sampleProducts;
-        localStorage.setItem(STORAGE_PRODUCTS, JSON.stringify(products));
-    } else {
-        // Patch: Add images to existing products if missing or if using old picsum seed
-        let changed = false;
-        products = products.map(p => {
-            if (!p.img || p.img.includes('picsum.photos')) {
-                // Use pollinations.ai for relevant images based on title
-                const keyword = encodeURIComponent(p.title + ' product photo');
-                p.img = `https://image.pollinations.ai/prompt/${keyword}`;
-                changed = true;
-            }
-            return p;
-        });
-        if (changed) {
-            localStorage.setItem(STORAGE_PRODUCTS, JSON.stringify(products));
+/************ Authentication Check ************/
+async function checkAuth() {
+    try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+            console.error('Error checking session:', error);
+            toast('Error checking authentication');
+            return false;
         }
+        
+        if (!session || !session.user) {
+            // Not logged in, redirect to login
+            console.log('No session found, redirecting to login');
+            window.location.href = './login.html';
+            return false;
+        }
+        
+        currentUser = session.user;
+        console.log('Session found for user:', currentUser.email);
+        return true;
+    } catch (error) {
+        console.error('Error in checkAuth:', error);
+        return false;
     }
-
-    if (!collabs || !Array.isArray(collabs)) {
-        collabs = sampleCollabs;
-        localStorage.setItem(STORAGE_COLLABS, JSON.stringify(collabs));
-    }
-
-    return { products, collabs };
 }
-function saveProducts(products) { localStorage.setItem(STORAGE_PRODUCTS, JSON.stringify(products)) }
-function saveCollabs(collabs) { localStorage.setItem(STORAGE_COLLABS, JSON.stringify(collabs)) }
 
-/************ Renderers (show edit/delete only for owner) ************/
+/************ Data helpers - Supabase ************/
+async function loadItems() {
+    try {
+        const { data, error } = await supabase
+            .from('items')
+            .select('*')
+            .eq('is_active', true)
+            .order('created_at', { ascending: false });
+        
+        if (error) throw error;
+        
+        // Transform Supabase data to app format
+        return (data || []).map(item => ({
+            id: item.id,
+            title: item.title,
+            price: `₹${item.price}`,
+            desc: item.description || '',
+            seller: 'Seller', // We'll get this from user metadata
+            contact: item.seller_id, // For now, use seller_id
+            img: item.image_url || '',
+            ts: new Date(item.created_at).getTime(),
+            ownerId: item.seller_id,
+            category: item.category || ''
+        }));
+    } catch (error) {
+        console.error('Error loading items:', error);
+        toast('Error loading items');
+        return [];
+    }
+}
+
+async function loadCollaborations() {
+    try {
+        const { data, error } = await supabase
+            .from('collaborations')
+            .select('*')
+            .order('created_at', { ascending: false });
+        
+        if (error) throw error;
+        
+        // Transform Supabase data to app format
+        return (data || []).map(collab => ({
+            id: collab.id,
+            title: collab.title,
+            cat: collab.category || '',
+            desc: collab.description || '',
+            contact: collab.contact_info || '',
+            joined: 0, // Not in schema, keeping for compatibility
+            ts: new Date(collab.created_at).getTime(),
+            ownerId: collab.creator_id
+        }));
+    } catch (error) {
+        console.error('Error loading collaborations:', error);
+        toast('Error loading collaborations');
+        return [];
+    }
+}
+
+async function saveItem(item, isEdit = false) {
+    try {
+        const itemData = {
+            title: item.title,
+            description: item.desc,
+            price: parseFloat(item.price.replace(/[₹,]/g, '')) || 0,
+            image_url: item.img || null,
+            category: item.category || null,
+            is_active: true,
+            seller_id: currentUser.id
+        };
+
+        if (isEdit) {
+            const { error } = await supabase
+                .from('items')
+                .update(itemData)
+                .eq('id', item.id)
+                .eq('seller_id', currentUser.id);
+            
+            if (error) throw error;
+        } else {
+            const { error } = await supabase
+                .from('items')
+                .insert([itemData]);
+            
+            if (error) throw error;
+        }
+        return true;
+    } catch (error) {
+        console.error('Error saving item:', error);
+        toast('Error saving item: ' + error.message);
+        return false;
+    }
+}
+
+async function saveCollaboration(collab, isEdit = false) {
+    try {
+        const collabData = {
+            title: collab.title,
+            category: collab.cat || 'General',
+            description: collab.desc || null,
+            contact_info: collab.contact || null,
+            creator_id: currentUser.id
+        };
+
+        if (isEdit) {
+            const { error } = await supabase
+                .from('collaborations')
+                .update(collabData)
+                .eq('id', collab.id)
+                .eq('creator_id', currentUser.id);
+            
+            if (error) throw error;
+        } else {
+            const { error } = await supabase
+                .from('collaborations')
+                .insert([collabData]);
+            
+            if (error) throw error;
+        }
+        return true;
+    } catch (error) {
+        console.error('Error saving collaboration:', error);
+        toast('Error saving collaboration: ' + error.message);
+        return false;
+    }
+}
+
+async function deleteItem(id) {
+    try {
+        const { error } = await supabase
+            .from('items')
+            .delete()
+            .eq('id', id)
+            .eq('seller_id', currentUser.id);
+        
+        if (error) throw error;
+        return true;
+    } catch (error) {
+        console.error('Error deleting item:', error);
+        toast('Error deleting item');
+        return false;
+    }
+
+}
+
+async function deleteCollaborationFromDB(id) {
+    try {
+        const { error } = await supabase
+            .from('collaborations')
+            .delete()
+            .eq('id', id)
+            .eq('creator_id', currentUser.id);
+        
+        if (error) throw error;
+        return true;
+    } catch (error) {
+        console.error('Error deleting collaboration:', error);
+        toast('Error deleting collaboration');
+        return false;
+    }
+}
+
+/************ Renderers ************/
 function renderProducts(products) {
     const grid = qs('#product-grid');
+    if (!grid) return;
     grid.innerHTML = '';
-    if (!products.length) { qs('#products-empty').style.display = 'block'; return } else qs('#products-empty').style.display = 'none';
+    if (!products.length) { 
+        if (qs('#products-empty')) qs('#products-empty').style.display = 'block'; 
+        return 
+    } else { 
+        if (qs('#products-empty')) qs('#products-empty').style.display = 'none'; 
+    }
+    
     products.sort((a, b) => b.ts - a.ts);
     for (const p of products) {
-        const card = document.createElement('article'); card.className = 'product-card'; card.setAttribute('role', 'listitem');
-        const img = document.createElement('img'); img.alt = p.title; img.src = p.img || placeholderFor(p.title);
-        const title = document.createElement('div'); title.className = 'product-title'; title.textContent = p.title;
-        const desc = document.createElement('div'); desc.className = 'product-desc'; desc.textContent = p.desc;
-        const meta = document.createElement('div'); meta.className = 'meta';
+        const card = document.createElement('article'); 
+        card.className = 'product-card'; 
+        card.setAttribute('role', 'listitem');
+        const img = document.createElement('img'); 
+        img.alt = p.title; 
+        img.src = p.img || placeholderFor(p.title);
+        const title = document.createElement('div'); 
+        title.className = 'product-title'; 
+        title.textContent = p.title;
+        const desc = document.createElement('div'); 
+        desc.className = 'product-desc'; 
+        desc.textContent = p.desc;
+        const meta = document.createElement('div'); 
+        meta.className = 'meta';
         meta.innerHTML = `<div><strong>${p.price}</strong></div><div class="small-muted">${timeAgo(p.ts)}</div>`;
-        const sellerRow = document.createElement('div'); sellerRow.className = 'small-muted'; sellerRow.textContent = 'Seller: ' + p.seller;
-        const actions = document.createElement('div'); actions.className = 'card-actions';
-        if (p.ownerId === deviceId) {
-            const editBtn = document.createElement('button'); editBtn.className = 'icon-btn'; editBtn.innerHTML = '✏️'; editBtn.title = 'Edit';
+        const sellerRow = document.createElement('div'); 
+        sellerRow.className = 'small-muted'; 
+        sellerRow.textContent = 'Seller: ' + (p.seller || 'User');
+        const actions = document.createElement('div'); 
+        actions.className = 'card-actions';
+        
+        if (p.ownerId === currentUser?.id) {
+            const editBtn = document.createElement('button'); 
+            editBtn.className = 'icon-btn'; 
+            editBtn.innerHTML = '✏️'; 
+            editBtn.title = 'Edit';
             editBtn.addEventListener('click', () => openSellModal(p));
 
-            const delBtn = document.createElement('button'); delBtn.className = 'icon-btn'; delBtn.innerHTML = '🗑️'; delBtn.title = 'Delete';
+            const delBtn = document.createElement('button'); 
+            delBtn.className = 'icon-btn'; 
+            delBtn.innerHTML = '🗑️'; 
+            delBtn.title = 'Delete';
             delBtn.style.color = '#ef4444';
             delBtn.addEventListener('click', () => deleteProduct(p.id));
 
             actions.append(editBtn, delBtn);
         } else {
-            const contactBtn = document.createElement('button'); contactBtn.className = 'btn btn-ghost'; contactBtn.textContent = 'Contact Seller';
+            const contactBtn = document.createElement('button'); 
+            contactBtn.className = 'btn btn-ghost'; 
+            contactBtn.textContent = 'Contact Seller';
             contactBtn.addEventListener('click', () => openContactModal(p));
             actions.append(contactBtn);
         }
@@ -104,31 +269,63 @@ function renderProducts(products) {
         grid.appendChild(card);
     }
 }
+
 function renderCollabs(collabs, filter = null) {
-    const grid = qs('#collab-grid'); grid.innerHTML = '';
+    const grid = qs('#collab-grid'); 
+    if (!grid) return;
+    grid.innerHTML = '';
     let list = collabs.slice().sort((a, b) => b.ts - a.ts);
     if (filter) list = list.filter(c => (c.cat || '').toLowerCase().includes(filter.toLowerCase()));
-    if (!list.length) { qs('#collabs-empty').style.display = 'block'; return } else qs('#collabs-empty').style.display = 'none';
+    if (!list.length) { 
+        if (qs('#collabs-empty')) qs('#collabs-empty').style.display = 'block'; 
+        return 
+    } else { 
+        if (qs('#collabs-empty')) qs('#collabs-empty').style.display = 'none'; 
+    }
+    
     for (const c of list) {
-        const card = document.createElement('article'); card.className = 'collab-card'; card.setAttribute('role', 'listitem');
-        const head = document.createElement('div'); head.className = 'collab-meta';
+        const card = document.createElement('article'); 
+        card.className = 'collab-card'; 
+        card.setAttribute('role', 'listitem');
+        const head = document.createElement('div'); 
+        head.className = 'collab-meta';
         head.innerHTML = `<div style="font-weight:700">${c.title}</div><div class="small-muted">${timeAgo(c.ts)}</div>`;
-        const tagwrap = document.createElement('div'); tagwrap.className = 'tags';
-        if (c.cat) { const tag = document.createElement('span'); tag.className = 'chip'; tag.textContent = c.cat; tagwrap.appendChild(tag); }
-        const desc = document.createElement('div'); desc.className = 'product-desc'; desc.textContent = c.desc;
-        const meta = document.createElement('div'); meta.className = 'small-muted'; meta.textContent = 'Posted by: ' + (c.contact || 'Anonymous');
-        const actions = document.createElement('div'); actions.className = 'card-actions';
-        if (c.ownerId === deviceId) {
-            const editBtn = document.createElement('button'); editBtn.className = 'icon-btn'; editBtn.innerHTML = '✏️'; editBtn.title = 'Edit';
+        const tagwrap = document.createElement('div'); 
+        tagwrap.className = 'tags';
+        if (c.cat) { 
+            const tag = document.createElement('span'); 
+            tag.className = 'chip'; 
+            tag.textContent = c.cat; 
+            tagwrap.appendChild(tag); 
+        }
+        const desc = document.createElement('div'); 
+        desc.className = 'product-desc'; 
+        desc.textContent = c.desc;
+        const meta = document.createElement('div'); 
+        meta.className = 'small-muted'; 
+        meta.textContent = 'Posted by: ' + (c.contact || 'Anonymous');
+        const actions = document.createElement('div'); 
+        actions.className = 'card-actions';
+        
+        if (c.ownerId === currentUser?.id) {
+            const editBtn = document.createElement('button'); 
+            editBtn.className = 'icon-btn'; 
+            editBtn.innerHTML = '✏️'; 
+            editBtn.title = 'Edit';
             editBtn.addEventListener('click', () => openCollabModal(c));
 
-            const delBtn = document.createElement('button'); delBtn.className = 'icon-btn'; delBtn.innerHTML = '🗑️'; delBtn.title = 'Delete';
+            const delBtn = document.createElement('button'); 
+            delBtn.className = 'icon-btn'; 
+            delBtn.innerHTML = '🗑️'; 
+            delBtn.title = 'Delete';
             delBtn.style.color = '#ef4444';
             delBtn.addEventListener('click', () => deleteCollab(c.id));
 
             actions.append(editBtn, delBtn);
         } else {
-            const messageBtn = document.createElement('button'); messageBtn.className = 'btn btn-primary'; messageBtn.textContent = '💬 Message';
+            const messageBtn = document.createElement('button'); 
+            messageBtn.className = 'btn btn-primary'; 
+            messageBtn.textContent = '💬 Message';
             messageBtn.addEventListener('click', () => openMessageModal(c));
             actions.append(messageBtn);
         }
@@ -137,47 +334,44 @@ function renderCollabs(collabs, filter = null) {
     }
 }
 
-/************ Placeholder image generator (simple base64 svg) ************/
+/************ Placeholder image generator ************/
 function placeholderFor(text = 'Item') {
     const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='500' height='300'><rect width='100%' height='100%' fill='#eef2ff'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-size='20' fill='#333'>${esc(text)}</text></svg>`;
     return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
 }
 
-/************ Actions ************/
-let state = loadData();
+/************ State Management ************/
+let state = { products: [], collabs: [] };
+
+async function refreshData() {
+    state.products = await loadItems();
+    state.collabs = await loadCollaborations();
 renderProducts(state.products);
 renderCollabs(state.collabs);
-
-// header buttons
-qs('#btn-buy').addEventListener('click', () => document.getElementById('products').scrollIntoView({ behavior: 'smooth' }));
-qs('#btn-collab').addEventListener('click', () => document.getElementById('collabs').scrollIntoView({ behavior: 'smooth' }));
-
-// open forms
-qs('#open-sell').addEventListener('click', () => openSellModal());
-qs('#open-collab').addEventListener('click', () => openCollabModal());
-
-// search
-qs('#product-search').addEventListener('input', (e) => {
-    const q = e.target.value.trim().toLowerCase();
-    const filtered = state.products.filter(p => p.title.toLowerCase().includes(q) || p.desc.toLowerCase().includes(q));
-    renderProducts(filtered);
-});
+    updateDashboard();
+}
 
 /************ Modal builders ************/
 const modalBack = qs('#modal-backdrop');
 function openModal(html) {
     qs('#modal-content').innerHTML = html;
-    modalBack.style.display = 'flex'; modalBack.setAttribute('aria-hidden', 'false');
-    // focus first input if exists
+    modalBack.style.display = 'flex'; 
+    modalBack.setAttribute('aria-hidden', 'false');
     const firstInput = modalBack.querySelector('input, textarea, button');
     if (firstInput) firstInput.focus();
 }
-function closeModal() { modalBack.style.display = 'none'; modalBack.setAttribute('aria-hidden', 'true'); qs('#modal-content').innerHTML = ''; }
+function closeModal() { 
+    modalBack.style.display = 'none'; 
+    modalBack.setAttribute('aria-hidden', 'true'); 
+    qs('#modal-content').innerHTML = ''; 
+}
 
+if (modalBack) {
 modalBack.addEventListener('click', (e) => { if (e.target === modalBack) closeModal(); });
+}
 
-/************ Sell product modal/form (fixed layout) ************/
+/************ Sell product modal/form ************/
 function openSellModal(product = null) {
     const isEdit = !!product;
     const html = `
@@ -195,21 +389,17 @@ function openSellModal(product = null) {
                 </div>
                 <div style="display:flex;gap:12px">
                   <div class="form-group" style="flex:1">
-                    <label for="price">Price</label>
-                    <input class="form-input" id="price" name="price" type="text" required placeholder="₹200" value="${product ? escapeHtml(product.price) : ''}"/>
+                    <label for="price">Price (₹)</label>
+                    <input class="form-input" id="price" name="price" type="number" required placeholder="200" value="${product ? escapeHtml(product.price.replace(/[₹,]/g, '')) : ''}"/>
                   </div>
                   <div class="form-group" style="flex:1">
-                    <label for="seller">Seller Name</label>
-                    <input class="form-input" id="seller" name="seller" type="text" required placeholder="Your name" value="${product ? escapeHtml(product.seller) : ''}"/>
+                    <label for="category">Category</label>
+                    <input class="form-input" id="category" name="category" type="text" placeholder="Electronics, Books, etc." value="${product ? escapeHtml(product.category || '') : ''}"/>
                   </div>
                 </div>
                 <div class="form-group">
                   <label for="desc">Description</label>
-                  <textarea class="form-input" id="desc" name="desc" rows="4" placeholder="Describe your product... (e.g. Handwritten neat notes, 40 pages, excellent condition)">${product ? escapeHtml(product.desc) : ''}</textarea>
-                </div>
-                <div class="form-group">
-                  <label for="contact">Contact (email/phone)</label>
-                  <input class="form-input" id="contact" name="contact" type="text" required placeholder="your.email@vedam.edu or +91..." value="${product ? escapeHtml(product.contact) : ''}"/>
+                  <textarea class="form-input" id="desc" name="desc" rows="4" placeholder="Describe your product...">${product ? escapeHtml(product.desc) : ''}</textarea>
                 </div>
               </div>
               <div class="form-side">
@@ -237,29 +427,23 @@ function openSellModal(product = null) {
         </div>
       `;
     openModal(html);
-    // after open bind handlers
+    
     const form = qs('#sell-form');
     const fileInput = qs('#img-input');
     const fileUploadArea = qs('#file-upload-area');
     const imgPreview = qs('#img-preview');
     let imgData = product && product.img ? product.img : '';
 
-    // Close button
     qs('#modal-close').addEventListener('click', closeModal);
-
-    // File input change
     fileInput.addEventListener('change', handleFileSelect);
 
-    // Drag and drop
     fileUploadArea.addEventListener('dragover', (e) => {
         e.preventDefault();
         fileUploadArea.classList.add('dragover');
     });
-
     fileUploadArea.addEventListener('dragleave', () => {
         fileUploadArea.classList.remove('dragover');
     });
-
     fileUploadArea.addEventListener('drop', (e) => {
         e.preventDefault();
         fileUploadArea.classList.remove('dragover');
@@ -286,34 +470,42 @@ function openSellModal(product = null) {
     }
 
     qs('#cancel-sell').addEventListener('click', closeModal);
-    form.addEventListener('submit', (ev) => {
+    form.addEventListener('submit', async (ev) => {
         ev.preventDefault();
+        const submitBtn = qs('button[type="submit"]');
+        const originalText = submitBtn.textContent;
+        submitBtn.disabled = true;
+        submitBtn.textContent = '⏳ Saving...';
+        
         const fd = new FormData(form);
         const obj = {
-            id: product ? product.id : uid(),
+            id: product ? product.id : null,
             title: fd.get('title').trim(),
-            price: fd.get('price').trim(),
-            seller: fd.get('seller').trim(),
+            price: `₹${fd.get('price').trim()}`,
             desc: fd.get('desc').trim(),
-            contact: fd.get('contact').trim(),
             img: imgData,
-            ts: product ? product.ts : Date.now(),
-            ownerId: product ? product.ownerId : deviceId
+            category: fd.get('category').trim() || null
         };
-        if (!obj.title || !obj.price) { alert('Please fill title and price'); return; }
-        if (product) {
-            state.products = state.products.map(p => p.id === product.id ? obj : p);
-        } else {
-            state.products.unshift(obj);
+        
+        if (!obj.title || !fd.get('price')) { 
+            alert('Please fill title and price'); 
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
+            return; 
         }
-        saveProducts(state.products);
-        renderProducts(state.products);
+        
+        const success = await saveItem(obj, isEdit);
+        if (success) {
         toast(product ? 'Product updated' : 'Product added');
         closeModal();
+            await refreshData();
+        }
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
     });
 }
 
-/************ Collab modal/form (category free text) ************/
+/************ Collab modal/form ************/
 function openCollabModal(collab = null) {
     const isEdit = !!collab;
     const html = `
@@ -329,11 +521,10 @@ function openCollabModal(collab = null) {
                   <label for="collab-title">Title</label>
                   <input class="form-input" id="collab-title" name="title" required placeholder="e.g. Need 2 devs for Hackathon" value="${collab ? escapeHtml(collab.title) : ''}"/>
                 </div>
-                
                 <div style="display:flex;gap:12px">
                   <div class="form-group" style="flex:1">
                     <label for="collab-cat">Category</label>
-                    <input class="form-input" id="collab-cat" name="cat" list="cat-suggestions" value="${collab ? escapeHtml(collab.cat) : ''}" placeholder="Type or select..." />
+                    <input class="form-input" id="collab-cat" name="cat" list="cat-suggestions" value="${collab ? escapeHtml(collab.cat) : ''}" placeholder="Type or select..." required />
                     <datalist id="cat-suggestions">
                       <option value="Hackathon">
                       <option value="Sports">
@@ -348,7 +539,6 @@ function openCollabModal(collab = null) {
                     <input class="form-input" id="collab-contact" name="contact" required placeholder="Email or Phone" value="${collab ? escapeHtml(collab.contact) : ''}"/>
                   </div>
                 </div>
-
                 <div class="form-group">
                   <label for="collab-desc">Description</label>
                   <textarea class="form-input" id="collab-desc" name="desc" rows="4" placeholder="Describe what you are looking for, time, place, etc.">${collab ? escapeHtml(collab.desc) : ''}</textarea>
@@ -366,60 +556,55 @@ function openCollabModal(collab = null) {
       `;
     openModal(html);
 
-    // Close handlers
     qs('#collab-modal-close').addEventListener('click', closeModal);
     qs('#cancel-collab').addEventListener('click', closeModal);
 
-    // Form submit
-    qs('#collab-form').addEventListener('submit', (ev) => {
+    qs('#collab-form').addEventListener('submit', async (ev) => {
         ev.preventDefault();
+        const submitBtn = qs('button[type="submit"]');
+        const originalText = submitBtn.textContent;
+        submitBtn.disabled = true;
+        submitBtn.textContent = '⏳ Saving...';
+        
         const fd = new FormData(ev.currentTarget);
         const obj = {
-            id: collab ? collab.id : uid(),
+            id: collab ? collab.id : null,
             title: fd.get('title').trim(),
-            cat: fd.get('cat') ? fd.get('cat').trim() : '',
+            cat: fd.get('cat') ? fd.get('cat').trim() : 'General',
             desc: fd.get('desc').trim(),
-            contact: fd.get('contact').trim(),
-            joined: collab ? collab.joined || 0 : 0,
-            ts: collab ? collab.ts : Date.now(),
-            ownerId: collab ? collab.ownerId : deviceId
+            contact: fd.get('contact').trim()
         };
 
         if (!obj.title || !obj.contact) {
             alert('Please fill Title and Contact fields');
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
             return;
         }
 
-        if (collab) {
-            state.collabs = state.collabs.map(c => c.id === collab.id ? obj : c);
-        } else {
-            state.collabs.unshift(obj);
+        const success = await saveCollaboration(obj, isEdit);
+        if (success) {
+            toast(collab ? 'Invite updated' : 'Invite created');
+            closeModal();
+            await refreshData();
         }
-        saveCollabs(state.collabs);
-        renderCollabs(state.collabs);
-        toast(collab ? 'Invite updated' : 'Invite created');
-        closeModal();
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
     });
 }
 
 /************ Contact modal ************/
-/************ Contact modal ************/
 function openContactModal(product) {
-    // Determine if contact is email or phone
-    const isEmail = product.contact.includes('@');
+    const isEmail = product.contact && product.contact.includes('@');
     let actionBtn = '';
 
     if (isEmail) {
-        actionBtn = `<a class="btn btn-primary" href="mailto:${encodeURIComponent(product.contact)}?subject=${encodeURIComponent('Interested in ' + product.title)}&body=${encodeURIComponent('Hi ' + product.seller + ',%0D%0A%0D%0AI am interested in your product ' + product.title + ' listed on CampusConnect.%0D%0APrice: ' + product.price + '%0D%0APlease let me know when I can pick it up on Vedam floor.%0D%0AThanks.')}" id="mailto" style="text-decoration:none;display:inline-block">📨 Open Mail App</a>`;
-    } else {
-        // WhatsApp logic
+        actionBtn = `<a class="btn btn-primary" href="mailto:${encodeURIComponent(product.contact)}?subject=${encodeURIComponent('Interested in ' + product.title)}" style="text-decoration:none;display:inline-block">📨 Open Mail App</a>`;
+    } else if (product.contact) {
         let phone = product.contact.replace(/\D/g, '');
-        // Default to India 91 if no country code seems present (length 10)
         if (phone.length === 10) phone = '91' + phone;
-
         const msg = "hi i am intersted to buy your item can be talk";
         const waUrl = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
-
         actionBtn = `<a class="btn btn-primary" href="${waUrl}" target="_blank" style="text-decoration:none;display:inline-block;background-color:#25D366;border-color:#25D366;color:white">💬 Chat on WhatsApp</a>`;
     }
 
@@ -433,9 +618,9 @@ function openContactModal(product) {
             <img src="${product.img || placeholderFor(product.title)}" class="contact-modal-img" style="width:140px;height:100px;object-fit:cover;border-radius:12px;border:2px solid rgba(15, 23, 42, 0.1)" alt="${escapeHtml(product.title)}" />
             <div style="flex:1">
               <div style="font-weight:700;font-size:18px;color:var(--text);margin-bottom:8px">${escapeHtml(product.title)}</div>
-              <div class="small-muted" style="margin-bottom:4px">Seller: ${escapeHtml(product.seller)}</div>
+              <div class="small-muted" style="margin-bottom:4px">Seller: ${escapeHtml(product.seller || 'User')}</div>
               <div class="small-muted" style="margin-bottom:12px">Price: <strong style="color:var(--accent)">${escapeHtml(product.price)}</strong></div>
-              ${actionBtn}
+              ${actionBtn || '<p class="small-muted">Contact information not available</p>'}
             </div>
           </div>
         </div>
@@ -451,15 +636,13 @@ function openContactModal(product) {
 }
 
 /************ Message modal for collaboration ************/
-/************ Message modal for collaboration ************/
 function openMessageModal(collab) {
     let actionBtn = '';
     if (collab.contact) {
         const isEmail = collab.contact.includes('@');
         if (isEmail) {
-            actionBtn = `<a class="btn btn-primary" href="mailto:${encodeURIComponent(collab.contact)}?subject=${encodeURIComponent('Re: ' + collab.title)}&body=${encodeURIComponent('Hi,%0D%0A%0D%0AI am interested in your collaboration post: ' + collab.title + '%0D%0A%0D%0A' + (collab.desc || '') + '%0D%0A%0D%0APlease let me know how I can get involved.%0D%0AThanks.')}" id="mailto" style="text-decoration:none;display:inline-block;text-align:center">📨 Open Mail App</a>`;
+            actionBtn = `<a class="btn btn-primary" href="mailto:${encodeURIComponent(collab.contact)}?subject=${encodeURIComponent('Re: ' + collab.title)}" style="text-decoration:none;display:inline-block;text-align:center">📨 Open Mail App</a>`;
         } else {
-            // WhatsApp logic
             let phone = collab.contact.replace(/\D/g, '');
             if (phone.length === 10) phone = '91' + phone;
             const msg = "hi i am intersted to join your team can be talk";
@@ -497,101 +680,117 @@ function openMessageModal(collab) {
     qs('#close-message').addEventListener('click', closeModal);
 }
 
-/************ Edit/Delete/Join functions (ownership enforced) ************/
-function deleteProduct(id) {
-    const p = state.products.find(x => x.id === id);
-    if (!p) return;
-    if (p.ownerId !== deviceId) { alert('Only the creator can delete this product.'); return; }
+/************ Delete functions ************/
+async function deleteProduct(id) {
     if (!confirm('Delete this product?')) return;
-    state.products = state.products.filter(p => p.id !== id);
-    saveProducts(state.products); renderProducts(state.products);
+    const success = await deleteItem(id);
+    if (success) {
     toast('Product removed');
+        await refreshData();
+    }
 }
-function deleteCollab(id) {
-    const c = state.collabs.find(x => x.id === id);
-    if (!c) return;
-    if (c.ownerId !== deviceId) { alert('Only the creator can delete this invite.'); return; }
+
+async function deleteCollab(id) {
     if (!confirm('Delete this invite?')) return;
-    state.collabs = state.collabs.filter(c => c.id !== id);
-    saveCollabs(state.collabs); renderCollabs(state.collabs);
-    toast('Invitation removed');
-}
-function toggleJoin(id) {
-    state.collabs = state.collabs.map(c => {
-        if (c.id === id) { c.joined = (c.joined || 0) + 1; }
-        return c;
-    });
-    saveCollabs(state.collabs); renderCollabs(state.collabs);
-    toast('Joined!');
+    const success = await deleteCollaborationFromDB(id);
+    if (success) {
+        toast('Invitation removed');
+        await refreshData();
+    }
 }
 
 /************ Helpers ************/
 function escapeHtml(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') }
-function exportData() { return { products: state.products, collabs: state.collabs } } // developer helper
-// expose for debugging in console
-window.exportData = exportData;
 
 /************ Theme toggle ************/
 function applyThemeFromStorage() {
     const t = localStorage.getItem(STORAGE_THEME) || 'light';
-    if (t === 'dark') document.body.classList.add('dark'); else document.body.classList.remove('dark');
-    qs('#theme-toggle').textContent = t === 'dark' ? '☀️' : '🌙';
+    if (t === 'dark') document.body.classList.add('dark'); 
+    else document.body.classList.remove('dark');
+    if (qs('#theme-toggle')) qs('#theme-toggle').textContent = t === 'dark' ? '☀️' : '🌙';
 }
 applyThemeFromStorage();
+if (qs('#theme-toggle')) {
 qs('#theme-toggle').addEventListener('click', () => {
     const isDark = document.body.classList.toggle('dark');
     localStorage.setItem(STORAGE_THEME, isDark ? 'dark' : 'light');
     qs('#theme-toggle').textContent = isDark ? '☀️' : '🌙';
 });
-
-/************ Edit open helpers ************/
-function openSellModalById(id) { const p = state.products.find(x => x.id === id); if (p) openSellModal(p) }
-function openCollabById(id) { const c = state.collabs.find(x => x.id === id); if (c) openCollabModal(c) }
+}
 
 /************ Dashboard updater ************/
 function updateDashboard() {
-    const myProducts = state.products.filter(p => p.ownerId === deviceId).length;
-    const myCollabs = state.collabs.filter(c => c.ownerId === deviceId).length;
+    if (!currentUser) return;
+    
+    const myProducts = state.products.filter(p => p.ownerId === currentUser.id).length;
+    const myCollabs = state.collabs.filter(c => c.ownerId === currentUser.id).length;
 
-    qs('#stat-products').textContent = myProducts;
-    qs('#stat-collabs').textContent = myCollabs;
+    if (qs('#stat-products')) qs('#stat-products').textContent = myProducts;
+    if (qs('#stat-collabs')) qs('#stat-collabs').textContent = myCollabs;
 
-    // Mock user info
-    qs('#user-avatar').textContent = 'A';
-    qs('#user-name').textContent = 'Ankit';
+    if (qs('#user-avatar')) qs('#user-avatar').textContent = (currentUser.email?.[0] || 'U').toUpperCase();
+    if (qs('#user-name')) qs('#user-name').textContent = currentUser.email?.split('@')[0] || 'User';
+}
 
-    // Activity feed
-    const activities = [];
-    state.products.filter(p => p.ownerId === deviceId).forEach(p => {
-        activities.push({ text: `Listed <strong>${escapeHtml(p.title)}</strong> for sale`, time: p.ts, icon: '🏷️' });
-    });
-    state.collabs.filter(c => c.ownerId === deviceId).forEach(c => {
-        activities.push({ text: `Posted invite: <strong>${escapeHtml(c.title)}</strong>`, time: c.ts, icon: '🤝' });
-    });
+/************ Initialize App ************/
+async function init() {
+    try {
+        console.log('Initializing app...');
+        const isAuthenticated = await checkAuth();
+        if (!isAuthenticated) {
+            console.log('Not authenticated, redirecting to login');
+            return;
+        }
+        
+        console.log('User authenticated:', currentUser?.email);
+        
+        // Set up event listeners
+        if (qs('#btn-buy')) qs('#btn-buy').addEventListener('click', () => document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' }));
+        if (qs('#btn-collab')) qs('#btn-collab').addEventListener('click', () => document.getElementById('collabs')?.scrollIntoView({ behavior: 'smooth' }));
+        if (qs('#open-sell')) qs('#open-sell').addEventListener('click', () => openSellModal());
+        if (qs('#open-collab')) qs('#open-collab').addEventListener('click', () => openCollabModal());
 
-    activities.sort((a, b) => b.time - a.time);
+        // Search
+        if (qs('#product-search')) {
+            qs('#product-search').addEventListener('input', (e) => {
+                const q = e.target.value.trim().toLowerCase();
+                const filtered = state.products.filter(p => 
+                    p.title.toLowerCase().includes(q) || 
+                    (p.desc || '').toLowerCase().includes(q)
+                );
+                renderProducts(filtered);
+            });
+        }
 
-    const list = qs('#activity-list');
-    if (activities.length) {
-        list.innerHTML = activities.slice(0, 5).map(a => `
-                    <li class="activity-item">
-                        <div class="activity-icon">${a.icon}</div>
-                        <div class="activity-content">
-                            <div class="activity-text">${a.text}</div>
-                            <div class="activity-time">${timeAgo(a.time)}</div>
-                        </div>
-                    </li>
-                `).join('');
+        // Load initial data
+        console.log('Loading data...');
+        await refreshData();
+        console.log('Data loaded successfully');
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+        });
+    } catch (error) {
+        console.error('Error initializing app:', error);
+        toast('Error loading app: ' + (error.message || 'Unknown error'));
+        // Show error in console for debugging
+        console.error('Full error:', error);
     }
 }
-updateDashboard();
 
-/************ Onload attach keyboard shortcuts for demo convenience ************/
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeModal();
-});
+// Show loading state
+document.body.style.cursor = 'wait';
 
-/************ Sidebar Toggle ************/
-qs('#sidebar-toggle').addEventListener('click', () => {
-    qs('#app-sidebar').classList.toggle('collapsed');
-});
+// Start the app when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        init().finally(() => {
+            document.body.style.cursor = 'default';
+        });
+    });
+} else {
+    init().finally(() => {
+        document.body.style.cursor = 'default';
+    });
+}

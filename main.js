@@ -24,20 +24,20 @@ let currentUser = null;
 async function checkAuth() {
     try {
         const { data: { session }, error } = await supabase.auth.getSession();
-        
+
         if (error) {
             console.error('Error checking session:', error);
             toast('Error checking authentication');
             return false;
         }
-        
+
         if (!session || !session.user) {
             // Not logged in, redirect to login
             console.log('No session found, redirecting to login');
             window.location.href = './login.html';
             return false;
         }
-        
+
         currentUser = session.user;
         console.log('Session found for user:', currentUser.email);
         return true;
@@ -55,9 +55,9 @@ async function loadItems() {
             .select('*')
             .eq('is_active', true)
             .order('created_at', { ascending: false });
-        
+
         if (error) throw error;
-        
+
         // Transform Supabase data to app format
         return (data || []).map(item => ({
             id: item.id,
@@ -84,9 +84,9 @@ async function loadCollaborations() {
             .from('collaborations')
             .select('*')
             .order('created_at', { ascending: false });
-        
+
         if (error) throw error;
-        
+
         // Transform Supabase data to app format
         return (data || []).map(collab => ({
             id: collab.id,
@@ -123,13 +123,13 @@ async function saveItem(item, isEdit = false) {
                 .update(itemData)
                 .eq('id', item.id)
                 .eq('seller_id', currentUser.id);
-            
+
             if (error) throw error;
         } else {
             const { error } = await supabase
                 .from('items')
                 .insert([itemData]);
-            
+
             if (error) throw error;
         }
         return true;
@@ -156,13 +156,13 @@ async function saveCollaboration(collab, isEdit = false) {
                 .update(collabData)
                 .eq('id', collab.id)
                 .eq('creator_id', currentUser.id);
-            
+
             if (error) throw error;
         } else {
             const { error } = await supabase
                 .from('collaborations')
                 .insert([collabData]);
-            
+
             if (error) throw error;
         }
         return true;
@@ -180,7 +180,7 @@ async function deleteItem(id) {
             .delete()
             .eq('id', id)
             .eq('seller_id', currentUser.id);
-        
+
         if (error) throw error;
         return true;
     } catch (error) {
@@ -198,7 +198,7 @@ async function deleteCollaborationFromDB(id) {
             .delete()
             .eq('id', id)
             .eq('creator_id', currentUser.id);
-        
+
         if (error) throw error;
         return true;
     } catch (error) {
@@ -213,54 +213,54 @@ function renderProducts(products) {
     const grid = qs('#product-grid');
     if (!grid) return;
     grid.innerHTML = '';
-    if (!products.length) { 
-        if (qs('#products-empty')) qs('#products-empty').style.display = 'block'; 
-        return 
-    } else { 
-        if (qs('#products-empty')) qs('#products-empty').style.display = 'none'; 
+    if (!products.length) {
+        if (qs('#products-empty')) qs('#products-empty').style.display = 'block';
+        return
+    } else {
+        if (qs('#products-empty')) qs('#products-empty').style.display = 'none';
     }
-    
+
     products.sort((a, b) => b.ts - a.ts);
     for (const p of products) {
-        const card = document.createElement('article'); 
-        card.className = 'product-card'; 
+        const card = document.createElement('article');
+        card.className = 'product-card';
         card.setAttribute('role', 'listitem');
-        const img = document.createElement('img'); 
-        img.alt = p.title; 
+        const img = document.createElement('img');
+        img.alt = p.title;
         img.src = p.img || placeholderFor(p.title);
-        const title = document.createElement('div'); 
-        title.className = 'product-title'; 
+        const title = document.createElement('div');
+        title.className = 'product-title';
         title.textContent = p.title;
-        const desc = document.createElement('div'); 
-        desc.className = 'product-desc'; 
+        const desc = document.createElement('div');
+        desc.className = 'product-desc';
         desc.textContent = p.desc;
-        const meta = document.createElement('div'); 
+        const meta = document.createElement('div');
         meta.className = 'meta';
         meta.innerHTML = `<div><strong>${p.price}</strong></div><div class="small-muted">${timeAgo(p.ts)}</div>`;
-        const sellerRow = document.createElement('div'); 
-        sellerRow.className = 'small-muted'; 
+        const sellerRow = document.createElement('div');
+        sellerRow.className = 'small-muted';
         sellerRow.textContent = 'Seller: ' + (p.seller || 'User');
-        const actions = document.createElement('div'); 
+        const actions = document.createElement('div');
         actions.className = 'card-actions';
-        
+
         if (p.ownerId === currentUser?.id) {
-            const editBtn = document.createElement('button'); 
-            editBtn.className = 'icon-btn'; 
-            editBtn.innerHTML = '✏️'; 
+            const editBtn = document.createElement('button');
+            editBtn.className = 'icon-btn';
+            editBtn.innerHTML = '✏️';
             editBtn.title = 'Edit';
             editBtn.addEventListener('click', () => openSellModal(p));
 
-            const delBtn = document.createElement('button'); 
-            delBtn.className = 'icon-btn'; 
-            delBtn.innerHTML = '🗑️'; 
+            const delBtn = document.createElement('button');
+            delBtn.className = 'icon-btn';
+            delBtn.innerHTML = '🗑️';
             delBtn.title = 'Delete';
             delBtn.style.color = '#ef4444';
             delBtn.addEventListener('click', () => deleteProduct(p.id));
 
             actions.append(editBtn, delBtn);
         } else {
-            const contactBtn = document.createElement('button'); 
-            contactBtn.className = 'btn btn-ghost'; 
+            const contactBtn = document.createElement('button');
+            contactBtn.className = 'btn btn-ghost';
             contactBtn.textContent = 'Contact Seller';
             contactBtn.addEventListener('click', () => openContactModal(p));
             actions.append(contactBtn);
@@ -271,60 +271,60 @@ function renderProducts(products) {
 }
 
 function renderCollabs(collabs, filter = null) {
-    const grid = qs('#collab-grid'); 
+    const grid = qs('#collab-grid');
     if (!grid) return;
     grid.innerHTML = '';
     let list = collabs.slice().sort((a, b) => b.ts - a.ts);
     if (filter) list = list.filter(c => (c.cat || '').toLowerCase().includes(filter.toLowerCase()));
-    if (!list.length) { 
-        if (qs('#collabs-empty')) qs('#collabs-empty').style.display = 'block'; 
-        return 
-    } else { 
-        if (qs('#collabs-empty')) qs('#collabs-empty').style.display = 'none'; 
+    if (!list.length) {
+        if (qs('#collabs-empty')) qs('#collabs-empty').style.display = 'block';
+        return
+    } else {
+        if (qs('#collabs-empty')) qs('#collabs-empty').style.display = 'none';
     }
-    
+
     for (const c of list) {
-        const card = document.createElement('article'); 
-        card.className = 'collab-card'; 
+        const card = document.createElement('article');
+        card.className = 'collab-card';
         card.setAttribute('role', 'listitem');
-        const head = document.createElement('div'); 
+        const head = document.createElement('div');
         head.className = 'collab-meta';
         head.innerHTML = `<div style="font-weight:700">${c.title}</div><div class="small-muted">${timeAgo(c.ts)}</div>`;
-        const tagwrap = document.createElement('div'); 
+        const tagwrap = document.createElement('div');
         tagwrap.className = 'tags';
-        if (c.cat) { 
-            const tag = document.createElement('span'); 
-            tag.className = 'chip'; 
-            tag.textContent = c.cat; 
-            tagwrap.appendChild(tag); 
+        if (c.cat) {
+            const tag = document.createElement('span');
+            tag.className = 'chip';
+            tag.textContent = c.cat;
+            tagwrap.appendChild(tag);
         }
-        const desc = document.createElement('div'); 
-        desc.className = 'product-desc'; 
+        const desc = document.createElement('div');
+        desc.className = 'product-desc';
         desc.textContent = c.desc;
-        const meta = document.createElement('div'); 
-        meta.className = 'small-muted'; 
+        const meta = document.createElement('div');
+        meta.className = 'small-muted';
         meta.textContent = 'Posted by: ' + (c.contact || 'Anonymous');
-        const actions = document.createElement('div'); 
+        const actions = document.createElement('div');
         actions.className = 'card-actions';
-        
+
         if (c.ownerId === currentUser?.id) {
-            const editBtn = document.createElement('button'); 
-            editBtn.className = 'icon-btn'; 
-            editBtn.innerHTML = '✏️'; 
+            const editBtn = document.createElement('button');
+            editBtn.className = 'icon-btn';
+            editBtn.innerHTML = '✏️';
             editBtn.title = 'Edit';
             editBtn.addEventListener('click', () => openCollabModal(c));
 
-            const delBtn = document.createElement('button'); 
-            delBtn.className = 'icon-btn'; 
-            delBtn.innerHTML = '🗑️'; 
+            const delBtn = document.createElement('button');
+            delBtn.className = 'icon-btn';
+            delBtn.innerHTML = '🗑️';
             delBtn.title = 'Delete';
             delBtn.style.color = '#ef4444';
             delBtn.addEventListener('click', () => deleteCollab(c.id));
 
             actions.append(editBtn, delBtn);
         } else {
-            const messageBtn = document.createElement('button'); 
-            messageBtn.className = 'btn btn-primary'; 
+            const messageBtn = document.createElement('button');
+            messageBtn.className = 'btn btn-primary';
             messageBtn.textContent = '💬 Message';
             messageBtn.addEventListener('click', () => openMessageModal(c));
             actions.append(messageBtn);
@@ -347,8 +347,8 @@ let state = { products: [], collabs: [] };
 async function refreshData() {
     state.products = await loadItems();
     state.collabs = await loadCollaborations();
-renderProducts(state.products);
-renderCollabs(state.collabs);
+    renderProducts(state.products);
+    renderCollabs(state.collabs);
     updateDashboard();
 }
 
@@ -356,19 +356,19 @@ renderCollabs(state.collabs);
 const modalBack = qs('#modal-backdrop');
 function openModal(html) {
     qs('#modal-content').innerHTML = html;
-    modalBack.style.display = 'flex'; 
+    modalBack.style.display = 'flex';
     modalBack.setAttribute('aria-hidden', 'false');
     const firstInput = modalBack.querySelector('input, textarea, button');
     if (firstInput) firstInput.focus();
 }
-function closeModal() { 
-    modalBack.style.display = 'none'; 
-    modalBack.setAttribute('aria-hidden', 'true'); 
-    qs('#modal-content').innerHTML = ''; 
+function closeModal() {
+    modalBack.style.display = 'none';
+    modalBack.setAttribute('aria-hidden', 'true');
+    qs('#modal-content').innerHTML = '';
 }
 
 if (modalBack) {
-modalBack.addEventListener('click', (e) => { if (e.target === modalBack) closeModal(); });
+    modalBack.addEventListener('click', (e) => { if (e.target === modalBack) closeModal(); });
 }
 
 /************ Sell product modal/form ************/
@@ -427,7 +427,7 @@ function openSellModal(product = null) {
         </div>
       `;
     openModal(html);
-    
+
     const form = qs('#sell-form');
     const fileInput = qs('#img-input');
     const fileUploadArea = qs('#file-upload-area');
@@ -476,7 +476,7 @@ function openSellModal(product = null) {
         const originalText = submitBtn.textContent;
         submitBtn.disabled = true;
         submitBtn.textContent = '⏳ Saving...';
-        
+
         const fd = new FormData(form);
         const obj = {
             id: product ? product.id : null,
@@ -486,18 +486,18 @@ function openSellModal(product = null) {
             img: imgData,
             category: fd.get('category').trim() || null
         };
-        
-        if (!obj.title || !fd.get('price')) { 
-            alert('Please fill title and price'); 
+
+        if (!obj.title || !fd.get('price')) {
+            alert('Please fill title and price');
             submitBtn.disabled = false;
             submitBtn.textContent = originalText;
-            return; 
+            return;
         }
-        
+
         const success = await saveItem(obj, isEdit);
         if (success) {
-        toast(product ? 'Product updated' : 'Product added');
-        closeModal();
+            toast(product ? 'Product updated' : 'Product added');
+            closeModal();
             await refreshData();
         }
         submitBtn.disabled = false;
@@ -565,7 +565,7 @@ function openCollabModal(collab = null) {
         const originalText = submitBtn.textContent;
         submitBtn.disabled = true;
         submitBtn.textContent = '⏳ Saving...';
-        
+
         const fd = new FormData(ev.currentTarget);
         const obj = {
             id: collab ? collab.id : null,
@@ -685,7 +685,7 @@ async function deleteProduct(id) {
     if (!confirm('Delete this product?')) return;
     const success = await deleteItem(id);
     if (success) {
-    toast('Product removed');
+        toast('Product removed');
         await refreshData();
     }
 }
@@ -705,23 +705,18 @@ function escapeHtml(s) { return String(s || '').replace(/&/g, '&amp;').replace(/
 /************ Theme toggle ************/
 function applyThemeFromStorage() {
     const t = localStorage.getItem(STORAGE_THEME) || 'light';
-    if (t === 'dark') document.body.classList.add('dark'); 
+    if (t === 'dark') document.body.classList.add('dark');
     else document.body.classList.remove('dark');
     if (qs('#theme-toggle')) qs('#theme-toggle').textContent = t === 'dark' ? '☀️' : '🌙';
 }
 applyThemeFromStorage();
-if (qs('#theme-toggle')) {
-qs('#theme-toggle').addEventListener('click', () => {
-    const isDark = document.body.classList.toggle('dark');
-    localStorage.setItem(STORAGE_THEME, isDark ? 'dark' : 'light');
-    qs('#theme-toggle').textContent = isDark ? '☀️' : '🌙';
-});
-}
+
+
 
 /************ Dashboard updater ************/
 function updateDashboard() {
     if (!currentUser) return;
-    
+
     const myProducts = state.products.filter(p => p.ownerId === currentUser.id).length;
     const myCollabs = state.collabs.filter(c => c.ownerId === currentUser.id).length;
 
@@ -741,21 +736,24 @@ async function init() {
             console.log('Not authenticated, redirecting to login');
             return;
         }
-        
+
         console.log('User authenticated:', currentUser?.email);
-        
+
         // Set up event listeners
         if (qs('#btn-buy')) qs('#btn-buy').addEventListener('click', () => document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' }));
         if (qs('#btn-collab')) qs('#btn-collab').addEventListener('click', () => document.getElementById('collabs')?.scrollIntoView({ behavior: 'smooth' }));
-        if (qs('#open-sell')) qs('#open-sell').addEventListener('click', () => openSellModal());
-        if (qs('#open-collab')) qs('#open-collab').addEventListener('click', () => openCollabModal());
+
+
+
+
+
 
         // Search
         if (qs('#product-search')) {
             qs('#product-search').addEventListener('input', (e) => {
                 const q = e.target.value.trim().toLowerCase();
-                const filtered = state.products.filter(p => 
-                    p.title.toLowerCase().includes(q) || 
+                const filtered = state.products.filter(p =>
+                    p.title.toLowerCase().includes(q) ||
                     (p.desc || '').toLowerCase().includes(q)
                 );
                 renderProducts(filtered);
@@ -766,7 +764,7 @@ async function init() {
         console.log('Loading data...');
         await refreshData();
         console.log('Data loaded successfully');
-        
+
         // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') closeModal();
@@ -785,12 +783,86 @@ document.body.style.cursor = 'wait';
 // Start the app when DOM is ready
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
+        setupActionButtons();
         init().finally(() => {
             document.body.style.cursor = 'default';
         });
     });
 } else {
+    setupActionButtons();
     init().finally(() => {
         document.body.style.cursor = 'default';
     });
 }
+
+function setupActionButtons() {
+    // Sell Button
+    const sellBtn = qs('#open-sell');
+    if (sellBtn) {
+        console.log('Sell button found, attaching listener');
+        // Clone to remove old listeners
+        const newBtn = sellBtn.cloneNode(true);
+        sellBtn.parentNode.replaceChild(newBtn, sellBtn);
+        newBtn.addEventListener('click', () => {
+            console.log('Sell button clicked. Current user:', currentUser);
+            if (!currentUser) {
+                console.warn('User not logged in');
+                toast('Please wait, verifying session...');
+                return;
+            }
+            console.log('Opening sell modal');
+            openSellModal();
+        });
+    } else {
+        console.error('Sell button NOT found');
+    }
+
+    // Collab Button (Create Invite)
+    const collabBtn = qs('#open-collab');
+    if (collabBtn) {
+        const newBtn = collabBtn.cloneNode(true);
+        collabBtn.parentNode.replaceChild(newBtn, collabBtn);
+        newBtn.addEventListener('click', () => {
+            if (!currentUser) {
+                toast('Please wait, verifying session...');
+                return;
+            }
+            openCollabModal();
+        });
+    }
+}
+
+// Expose modals globally for inline onclick fallback
+window.openSellModal = (product) => {
+    if (!currentUser) {
+        toast('Please wait, verifying session...');
+        return;
+    }
+    // Call the local function defined in this module
+    openSellModal(product);
+};
+
+window.openCollabModal = (collab) => {
+    if (!currentUser) {
+        toast('Please wait, verifying session...');
+        return;
+    }
+    openCollabModal(collab);
+};
+
+// Diagnostic: Test DB Connection
+async function testDbConnection() {
+    console.log('Testing Supabase connection...');
+    try {
+        const { data, error } = await supabase.from('items').select('count', { count: 'exact', head: true });
+        if (error) {
+            console.error('Supabase connection FAILED:', error);
+            // alert('Database Error: ' + error.message); // Keep silent for now, log only
+        } else {
+            console.log('Supabase connection SUCCESS. Item count:', data);
+        }
+    } catch (err) {
+        console.error('Supabase connection EXCEPTION:', err);
+    }
+}
+testDbConnection();

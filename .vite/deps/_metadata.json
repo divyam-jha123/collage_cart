@@ -5,9 +5,9 @@
   "browserHash": "d00b0aac",
   "optimized": {
     "@supabase/supabase-js": {
-      "src": "../../@supabase/supabase-js/dist/module/index.js",
+      "src": "../../node_modules/@supabase/supabase-js/dist/module/index.js",
       "file": "@supabase_supabase-js.js",
-      "fileHash": "8a855bf3",
+      "fileHash": "88612c81",
       "needsInterop": false
     }
   },

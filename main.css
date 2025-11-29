@@ -23,10 +23,6 @@
      /* Mesh Gradient Background */
      background-color: #f3f4f6;
      background-image:
-         radial-gradient(at 0% 0%, hsla(253, 16%, 7%, 1) 0, transparent 50%),
-         radial-gradient(at 50% 0%, hsla(225, 39%, 30%, 1) 0, transparent 50%),
-         radial-gradient(at 100% 0%, hsla(339, 49%, 30%, 1) 0, transparent 50%);
-     background-image:
          radial-gradient(at 10% 10%, rgba(255, 220, 200, 0.6) 0px, transparent 50%),
          radial-gradient(at 90% 10%, rgba(130, 80, 255, 0.5) 0px, transparent 50%),
          radial-gradient(at 30% 40%, rgba(255, 100, 80, 0.5) 0px, transparent 50%),
@@ -49,6 +45,9 @@
      --text: #e2e8f0;
      --shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
      --muted-2: #64748b;
+     /* Override light gradient aggressively */
+     background-image: none !important;
+     background-color: #1a1f2e !important;
  }
 
  .container {

@@ -247,7 +247,7 @@ function renderProducts(products) {
         if (p.ownerId === currentUser?.id) {
             const editBtn = document.createElement('button');
             editBtn.className = 'btn-action btn-edit';
-            editBtn.innerHTML = '<img src="./edit-icon.png" alt="Edit" />';
+            editBtn.innerHTML = '<img src="/edit-icon.png" alt="Edit" />';
             editBtn.title = 'Edit';
             editBtn.addEventListener('click', () => {
                 openSellModal(p);
@@ -255,7 +255,7 @@ function renderProducts(products) {
 
             const delBtn = document.createElement('button');
             delBtn.className = 'btn-action btn-delete';
-            delBtn.innerHTML = '<img src="./delete-icon.png" alt="Delete" />';
+            delBtn.innerHTML = '<img src="/delete-icon.png" alt="Delete" />';
             delBtn.title = 'Delete';
             delBtn.addEventListener('click', async () => {
                 if (confirm('Are you sure you want to delete this item?')) {
@@ -365,13 +365,13 @@ function renderCollabs(collabs, filter = null) {
         if (c.ownerId === currentUser?.id) {
             const editBtn = document.createElement('button');
             editBtn.className = 'btn-action btn-edit';
-            editBtn.innerHTML = '<img src="./edit-icon.png" alt="Edit" />';
+            editBtn.innerHTML = '<img src="/edit-icon.png" alt="Edit" />';
             editBtn.title = 'Edit';
             editBtn.addEventListener('click', () => openCollabModal(c));
 
             const delBtn = document.createElement('button');
             delBtn.className = 'btn-action btn-delete';
-            delBtn.innerHTML = '<img src="./delete-icon.png" alt="Delete" />';
+            delBtn.innerHTML = '<img src="/delete-icon.png" alt="Delete" />';
             delBtn.title = 'Delete';
             delBtn.addEventListener('click', () => deleteCollab(c.id));
 
@@ -406,8 +406,8 @@ let state = { products: [], collabs: [] };
 async function refreshData() {
     state.products = await loadItems();
     state.collabs = await loadCollaborations();
-renderProducts(state.products);
-renderCollabs(state.collabs);
+    renderProducts(state.products);
+    renderCollabs(state.collabs);
     updateDashboard();
 }
 
@@ -427,7 +427,7 @@ function closeModal() {
 }
 
 if (modalBack) {
-modalBack.addEventListener('click', (e) => { if (e.target === modalBack) closeModal(); });
+    modalBack.addEventListener('click', (e) => { if (e.target === modalBack) closeModal(); });
 }
 
 /************ Sell product modal/form ************/
@@ -568,8 +568,8 @@ function openSellModal(product = null) {
 
         const success = await saveItem(obj, isEdit);
         if (success) {
-        toast(product ? 'Product updated' : 'Product added');
-        closeModal();
+            toast(product ? 'Product updated' : 'Product added');
+            closeModal();
             await refreshData();
         }
         submitBtn.disabled = false;
@@ -827,7 +827,7 @@ async function deleteProduct(id) {
     if (!confirm('Delete this product?')) return;
     const success = await deleteItem(id);
     if (success) {
-    toast('Product removed');
+        toast('Product removed');
         await refreshData();
     }
 }
@@ -836,7 +836,7 @@ async function deleteCollab(id) {
     if (!confirm('Delete this invite?')) return;
     const success = await deleteCollaborationFromDB(id);
     if (success) {
-    toast('Invitation removed');
+        toast('Invitation removed');
         await refreshData();
     }
 }

@@ -39,7 +39,7 @@ function updateThemeIcon(isDark) {
 // Initialize theme on page load
 document.addEventListener('DOMContentLoaded', () => {
     applyThemeFromStorage();
-
+    
     const themeToggle = document.getElementById('theme-toggle');
     if (themeToggle) {
         themeToggle.addEventListener('click', () => {
@@ -53,12 +53,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const signupForm = document.getElementById('signup-form');
     if (signupForm) {
         signupForm.addEventListener('submit', handleSignup);
-    }
-
-    // Set up Google signup handler
-    const googleBtn = document.getElementById('google-signup-btn');
-    if (googleBtn) {
-        googleBtn.addEventListener('click', handleGoogleSignup);
     }
 
     // Check if user is already logged in
@@ -78,33 +72,33 @@ async function checkAuth() {
 async function handleSignup(event) {
     event.preventDefault();
     event.stopPropagation();
-
+    
     const email = document.getElementById('signup-email').value.trim();
     const password = document.getElementById('signup-password').value.trim();
     const confirmPassword = document.getElementById('confirm-password').value.trim();
-
+    
     // Validation
     if (!email || !password) {
         showNotification('Please enter both email and password', 'error');
         return false;
     }
-
+    
     if (password.length < 6) {
         showNotification('Password must be at least 6 characters long', 'error');
         return false;
     }
-
+    
     if (password !== confirmPassword) {
         showNotification('Passwords do not match', 'error');
         return false;
     }
-
+    
     // Show loading state
     const signupBtn = document.querySelector('.login-btn');
     const originalText = signupBtn.textContent;
     signupBtn.disabled = true;
     signupBtn.textContent = 'Creating account...';
-
+    
     try {
         // Sign up with Supabase Auth
         const { data, error } = await supabase.auth.signUp({
@@ -114,11 +108,11 @@ async function handleSignup(event) {
                 emailRedirectTo: window.location.origin + '/main.html'
             }
         });
-
+        
         if (error) {
             throw error;
         }
-
+        
         if (data.user) {
             showNotification('Account created successfully! Please check your email to verify your account, or you can try logging in now.', 'success');
             // Redirect to login page after 2 seconds
@@ -134,34 +128,7 @@ async function handleSignup(event) {
         signupBtn.textContent = originalText;
         return false;
     }
-
+    
     return false;
-}
-
-// Handle Google Signup
-async function handleGoogleSignup(event) {
-    event.preventDefault();
-
-    const googleBtn = document.getElementById('google-signup-btn');
-    const originalText = googleBtn.innerHTML;
-    googleBtn.disabled = true;
-    googleBtn.innerHTML = '<span>Connecting...</span>';
-
-    try {
-        const { data, error } = await supabase.auth.signInWithOAuth({
-            provider: 'google',
-            options: {
-                redirectTo: window.location.origin + '/main.html'
-            }
-        });
-
-        if (error) throw error;
-
-    } catch (error) {
-        console.error('Google signup error:', error);
-        showNotification('Google signup failed: ' + error.message, 'error');
-        googleBtn.disabled = false;
-        googleBtn.innerHTML = originalText;
-    }
 }
 

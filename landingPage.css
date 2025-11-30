@@ -600,7 +600,8 @@ body {
     }
 
     .nav-right .btn {
-        display: none;
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
     }
 
     .mobile-menu-btn {
@@ -610,23 +611,43 @@ body {
         cursor: pointer;
         padding: 0.5rem;
         color: var(--text-primary);
+        min-width: 44px;
+        min-height: 44px;
     }
 
     .hero {
-        padding: 6rem var(--spacing-md) 3rem;
+        padding: 5rem var(--spacing-sm) 2.5rem;
     }
 
     .hero-title {
-        font-size: 2.5rem;
+        font-size: 2rem;
+        line-height: 1.2;
+    }
+
+    .hero-description {
+        font-size: 1rem;
     }
 
     .hero-buttons {
         flex-direction: column;
+        width: 100%;
+    }
+
+    .hero-buttons .btn {
+        width: 100%;
     }
 
     .hero-stats {
         flex-direction: column;
         gap: var(--spacing-md);
+    }
+
+    .section-title {
+        font-size: 2rem;
+    }
+
+    .section-description {
+        font-size: 1rem;
     }
 
     .features-grid {
@@ -635,14 +656,36 @@ body {
 
     .categories-grid {
         grid-template-columns: repeat(2, 1fr);
+        gap: var(--spacing-sm);
+    }
+
+    .category-card {
+        padding: var(--spacing-md);
     }
 
     .events-content {
         grid-template-columns: 1fr;
+        gap: var(--spacing-lg);
+    }
+
+    .events-title {
+        font-size: 2rem;
+    }
+
+    .events-description {
+        font-size: 1rem;
     }
 
     .steps-grid {
         grid-template-columns: 1fr;
+    }
+
+    .cta-title {
+        font-size: 2rem;
+    }
+
+    .cta-description {
+        font-size: 1rem;
     }
 
     .footer-grid {
@@ -652,6 +695,78 @@ body {
 
     .cta-buttons {
         flex-direction: column;
+        width: 100%;
+    }
+
+    .cta-buttons .btn {
+        width: 100%;
+    }
+
+    /* Better touch targets */
+    .btn {
+        min-height: 44px;
+        min-width: 44px;
+    }
+
+    .nav-link {
+        padding: 0.75rem;
+    }
+}
+
+/* Extra small devices */
+@media (max-width: 480px) {
+    .container {
+        padding: 0 1rem;
+    }
+
+    .hero-title {
+        font-size: 1.75rem;
+    }
+
+    .hero-badge {
+        font-size: 0.75rem;
+        padding: 0.4rem 1rem;
+    }
+
+    .stat-number {
+        font-size: 1.5rem;
+    }
+
+    .categories-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .category-icon {
+        font-size: 2.5rem;
+    }
+
+    .section-title {
+        font-size: 1.75rem;
+    }
+
+    .events-title,
+    .cta-title {
+        font-size: 1.75rem;
+    }
+
+    .step-number {
+        width: 48px;
+        height: 48px;
+        font-size: 1.5rem;
+    }
+
+    .step-title {
+        font-size: 1.25rem;
+    }
+
+    .btn-lg {
+        padding: 0.75rem 1.5rem;
+        font-size: 0.9rem;
+    }
+
+    .btn-xl {
+        padding: 0.875rem 2rem;
+        font-size: 1rem;
     }
 }
 

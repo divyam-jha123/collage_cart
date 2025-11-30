@@ -23,6 +23,12 @@ document.addEventListener('DOMContentLoaded', () => {
         loginForm.addEventListener('submit', handleLogin);
     }
 
+    // Set up Google login handler
+    const googleBtn = document.getElementById('google-login-btn');
+    if (googleBtn) {
+        googleBtn.addEventListener('click', handleGoogleLogin);
+    }
+
     // Set up password reset link
     const resetLink = document.getElementById('reset-password-link');
     if (resetLink) {
@@ -115,6 +121,34 @@ async function handleLogin(event) {
     return false;
 }
 
+// Handle Google Login
+async function handleGoogleLogin(event) {
+    event.preventDefault();
+
+    const googleBtn = document.getElementById('google-login-btn');
+    const originalText = googleBtn.innerHTML;
+    googleBtn.disabled = true;
+    googleBtn.innerHTML = '<span>Connecting...</span>';
+
+    try {
+        const { data, error } = await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+                redirectTo: window.location.origin + '/main.html'
+            }
+        });
+
+        if (error) throw error;
+
+        // OAuth redirect happens automatically, so we might not reach here if successful
+    } catch (error) {
+        console.error('Google login error:', error);
+        showNotification('Google login failed: ' + error.message, 'error');
+        googleBtn.disabled = false;
+        googleBtn.innerHTML = originalText;
+    }
+}
+
 // Handle password reset
 async function handlePasswordReset() {
     const email = document.getElementById('college-code').value.trim();
@@ -125,14 +159,14 @@ async function handlePasswordReset() {
         emailInput.type = 'email';
         emailInput.placeholder = 'Enter your email address';
         emailInput.style.cssText = 'width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px;';
-        
+
         const form = document.getElementById('login-form');
         const existingInput = form.querySelector('#reset-email-input');
         if (existingInput) existingInput.remove();
-        
+
         emailInput.id = 'reset-email-input';
         form.insertBefore(emailInput, form.firstChild);
-        
+
         emailInput.focus();
         emailInput.addEventListener('blur', async () => {
             const emailValue = emailInput.value.trim();
@@ -155,7 +189,7 @@ async function handlePasswordReset() {
                 emailInput.remove();
             }
         });
-        
+
         emailInput.addEventListener('keypress', async (e) => {
             if (e.key === 'Enter') {
                 emailInput.blur();

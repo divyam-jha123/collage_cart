@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS items (
     image_url TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     category TEXT,
+    contact_info TEXT,
     is_active BOOLEAN DEFAULT TRUE
 );
 

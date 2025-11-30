@@ -4,7 +4,7 @@ export default defineConfig({
   root: '.',
   server: {
     port: 3000,
-    open: '/login.html',
+    open: '/landingPage.html',
     host: true
   },
   build: {
@@ -12,10 +12,11 @@ export default defineConfig({
     assetsDir: 'assets',
     rollupOptions: {
       input: {
+        index: './index.html',
+        landing: './landingPage.html',
         main: './main.html',
         login: './login.html',
         signup: './signup.html',
-        index: './index.html',
         collab: './collab.html'
       }
     }

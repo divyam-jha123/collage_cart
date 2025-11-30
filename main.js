@@ -883,7 +883,7 @@ async function init() {
 
         // Set up event listeners
         if (qs('#btn-buy')) qs('#btn-buy').addEventListener('click', () => document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' }));
-        if (qs('#btn-collab')) qs('#btn-collab').addEventListener('click', () => document.getElementById('collabs')?.scrollIntoView({ behavior: 'smooth' }));
+        if (qs('#btn-collab')) qs('#btn-collab').addEventListener('click', () => window.location.href = './collab.html');
 
 
 

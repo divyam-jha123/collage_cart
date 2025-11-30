@@ -1,0 +1,77 @@
+/* Collaboration Page Specific Styles */
+
+.collab-page-header {
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+    color: white;
+    padding: 32px 24px;
+    border-radius: var(--radius);
+    margin-bottom: 24px;
+    text-align: center;
+}
+
+.collab-page-header h1 {
+    margin: 0 0 8px 0;
+    font-size: 32px;
+    font-weight: 700;
+}
+
+.collab-page-header p {
+    margin: 0;
+    opacity: 0.9;
+    font-size: 16px;
+}
+
+/* Enhanced collaboration card for dedicated page */
+.collab-card {
+    position: relative;
+    overflow: visible;
+}
+
+.collab-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    border-radius: var(--radius) var(--radius) 0 0;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.collab-card:hover::before {
+    opacity: 1;
+}
+
+/* Category badge styling */
+.collab-category {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    background: rgba(102, 126, 234, 0.1);
+    color: var(--accent);
+    border: 1px solid rgba(102, 126, 234, 0.2);
+}
+
+body.dark .collab-category {
+    background: rgba(129, 140, 248, 0.15);
+    color: var(--accent);
+    border-color: rgba(129, 140, 248, 0.3);
+}
+
+/* Empty state enhancement */
+.empty-state {
+    padding: 64px 24px;
+    text-align: center;
+}
+
+.empty-state::before {
+    content: '🤝';
+    display: block;
+    font-size: 64px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+}

@@ -15,7 +15,8 @@ export default defineConfig({
         main: './main.html',
         login: './login.html',
         signup: './signup.html',
-        index: './index.html'
+        index: './index.html',
+        collab: './collab.html'
       }
     }
   }

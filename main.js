@@ -475,7 +475,7 @@ function openSellModal(product = null) {
               <div style="display: flex; flex-direction: column; gap: 16px;">
                 <div class="form-group" style="height: 100%; display: flex; flex-direction: column;">
                   <label style="font-weight: 600; color: var(--text); margin-bottom: 6px; display: block;">Product Image</label>
-                  <div class="file-upload-area" id="file-upload-area" style="flex: 1; border: 2px dashed rgba(15,23,42,0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; background: rgba(15,23,42,0.02); transition: all 0.2s ease; min-height: 200px; position: relative; overflow: hidden;">
+                  <div class="file-upload-area" id="file-upload-area" style="flex: 1; border: 2px dashed rgba(15,23,42,0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; background: rgba(15,23,42,0.02); transition: all 0.2s ease; min-height: 500px; position: relative; overflow: hidden;">
                     <div class="file-input-wrapper" style="text-align: center; padding: 20px;">
                       <input id="img-input" type="file" accept="image/*" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 10;" />
                       <div class="file-upload-icon" style="font-size: 32px; margin-bottom: 8px;">📷</div>
@@ -483,7 +483,7 @@ function openSellModal(product = null) {
                       <div class="file-upload-hint" style="font-size: 12px; color: var(--muted); margin-top: 4px;">PNG, JPG up to 5MB</div>
                     </div>
                     <div id="img-preview" class="img-preview" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;">
-                      ${product && product.img ? `<img src="${product.img}" alt="Product preview" style="width: 100%; height: 100%; object-fit: cover;" />` : ''}
+                      ${product && product.img ? `<img src="${product.img}" alt="Product preview" style="width: 100%; height: 100%; max-height: 100%; object-fit: cover;" />` : ''}
                     </div>
                   </div>
                 </div>
@@ -535,7 +535,7 @@ function openSellModal(product = null) {
         const reader = new FileReader();
         reader.onload = e => {
             imgData = e.target.result;
-            imgPreview.innerHTML = `<img src="${imgData}" alt="Product preview" />`;
+            imgPreview.innerHTML = `<img src="${imgData}" alt="Product preview" style="width: 100%; height: 100%; max-height: 100%; object-fit: cover;" />`;
         };
         reader.readAsDataURL(f);
     }
@@ -738,14 +738,14 @@ function openContactModal(product) {
         <div class="modal-body" style="padding: 24px;">
           
           <!-- Product Hero -->
-          <div style="display: flex; gap: 20px; margin-bottom: 24px; align-items: center;">
+          <div style="display: flex; gap: 24px; margin-bottom: 24px; align-items: flex-start;">
             <img src="${product.img || placeholderFor(product.title)}" 
-                 style="width: 80px; height: 80px; object-fit: cover; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border: 1px solid rgba(15,23,42,0.05);" 
+                 style="width: 150px; height: 150px; object-fit: cover; border-radius: 12px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); border: 1px solid rgba(15,23,42,0.05);" 
                  alt="${escapeHtml(product.title)}" />
             <div>
-              <h4 style="margin: 0 0 4px 0; font-size: 18px; font-weight: 700; color: var(--text);">${escapeHtml(product.title)}</h4>
-              <div style="font-size: 16px; font-weight: 600; color: var(--accent);">${escapeHtml(product.price)}</div>
-              <div class="small-muted" style="margin-top: 4px; font-size: 13px;">${escapeHtml(product.category || 'General')}</div>
+              <h4 style="margin: 0 0 8px 0; font-size: 20px; font-weight: 700; color: var(--text);">${escapeHtml(product.title)}</h4>
+              <div style="font-size: 18px; font-weight: 600; color: var(--accent); margin-bottom: 8px;">${escapeHtml(product.price)}</div>
+              <div class="small-muted" style="font-size: 14px;">${escapeHtml(product.category || 'General')}</div>
             </div>
           </div>
 

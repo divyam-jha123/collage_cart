@@ -225,19 +225,27 @@ document.head.appendChild(notifStyle);
 document.querySelectorAll('.btn-hero, .btn-primary').forEach(btn => {
     const text = btn.textContent.trim();
 
-    if (text.includes('Get Started') || text.includes('Browse') || text.includes('Explore')) {
-        btn.addEventListener('click', () => {
-            window.location.href = './signup.html';
-        });
-    }
-
-    if (text.includes('Create')) {
+    // Browse Marketplace should go to login (sign in first)
+    if (text.includes('Browse')) {
         btn.addEventListener('click', () => {
             window.location.href = './login.html';
         });
     }
 
-    if (text.includes('Learn More')) {
+    // Get Started and Explore Events should go to signup (new users)
+    else if (text.includes('Get Started') || text.includes('Explore')) {
+        btn.addEventListener('click', () => {
+            window.location.href = './signup.html';
+        });
+    }
+
+    else if (text.includes('Create')) {
+        btn.addEventListener('click', () => {
+            window.location.href = './login.html';
+        });
+    }
+
+    else if (text.includes('Learn More')) {
         btn.addEventListener('click', () => {
             document.getElementById('how-it-works').scrollIntoView({ behavior: 'smooth' });
         });

@@ -5,13 +5,12 @@
 [build.environment]
   NODE_VERSION = "18"
 
-# SPA fallback - redirect all routes to index.html
+# Specific page redirects - these are processed in order
 [[redirects]]
-  from = "/*"
-  to = "/index.html"
+  from = "/"
+  to = "/landingPage.html"
   status = 200
 
-# Specific route redirects for better SEO
 [[redirects]]
   from = "/login"
   to = "/login.html"
@@ -25,5 +24,15 @@
 [[redirects]]
   from = "/dashboard"
   to = "/main.html"
+  status = 200
+
+[[redirects]]
+  from = "/collab"
+  to = "/collab.html"
+  status = 200
+
+[[redirects]]
+  from = "/collaborations"
+  to = "/collab.html"
   status = 200
 
